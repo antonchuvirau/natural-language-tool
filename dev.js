@@ -106,11 +106,14 @@ const RULES = [
         content: [`<b>As a rule, start a new section after every 1-2 sentences. That means add a line break.</b>`, `Then write your next line (as demonstrated here).`]
     }
 ];
+const LOCAL_STORATE_ID = `ntl-id`;
 
 const form = document.querySelector(`.dev-form`);
 const formSubmitButton = document.querySelector(`.dev-form__button`);
 const formTextarea = document.querySelector(`.dev-form__textarea`);
 
 document.addEventListener(`DOMContentLoaded`, () => {
-    formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
+    if (formTextarea) {
+        formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
+    }
 });
