@@ -44,6 +44,19 @@ function changeFormStatus(isDisabled = false) {
     }
 }
 
+function getLocalStorageNtlId(localStorageNtlIdName) {
+    return localStorage.getItem(`localStorageNtlIdName`);
+}
+
+function setLocalStorageNtlId(localStorageNtlIdName, localStorageNtlIdValue) {
+    localStorage.setItem(localStorageNtlIdName, localStorageNtlIdValue);
+}
+
+function generateTimestamp() {
+    const dateNow = new Date();
+    return dateNow.getTime();
+}
+
 // VARIABLES
 const AJAX_URL = `https://rubineducation.com/wp-admin/admin-ajax.php`;
 const RULES = [
@@ -108,7 +121,7 @@ const RULES = [
         content: [`<b>As a rule, start a new section after every 1-2 sentences. That means add a line break.</b>`, `Then write your next line (as demonstrated here).`]
     }
 ];
-const LOCAL_STORATE_ID = `ntl-id`;
+const LOCAL_STORAGE_NTL_ID_NAME = `ntl-id`;
 
 const form = document.querySelector(`.dev-form`);
 const formSubmitButton = document.querySelector(`.dev-form__button`);
@@ -118,5 +131,11 @@ const formTextarea = document.querySelector(`.dev-form__textarea`);
 document.addEventListener(`DOMContentLoaded`, () => {
     if (formTextarea) {
         formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
+    }
+    // LOCAL STORAGE DATA
+    const localStorageNtlId = getLocalStorageNtlId(LOCAL_STORAGE_NTL_ID_NAME);
+    if (!localStorageNtlId) {
+        // CREATING LOCAL STORAGE NTL ID
+        setLocalStorageNtlId(LOCAL_STORAGE_NTL_ID_NAME, generateTimestamp());
     }
 });
