@@ -4,17 +4,19 @@
 function onFormTextareaKeydownHandler(evt) {
     const keyCode = evt.code;
 
-    if (keyCode === `Enter`) {
+    if (keyCode === KEY_CODE_NAME) {
         changeFormStatus(true);
-        const formTextareaTextContent = formTextarea.value;
-        const formSubject = document.querySelector(`input[name="subject"]`).value;
+        const formTextareaContent = formTextarea.value;
+        const formSubjectContent = formSubjectInput.value;
+        // CREATING FORM DATA OBJECT
         const formData = new FormData();
-        formData.set(`action`, `nlt`);
-        formData.set(`content`, formTextareaTextContent);
-        formData.set(`subject`, formSubject);
+        formData.set(`action`, WORDPRESS_AJAX_ACTION_NAME);
+        formData.set(`id`, getLocalStorageNltId(LOCAL_STORAGE_NLT_ID_NAME));
+        formData.set(`content`, formTextareaContent);
+        formData.set(`subject`, formSubjectContent);
         // SENDING DATA TO THE SERVER
-        const response = getResponse(formData);
-        response.then(resp => resp.json()).then(data => {
+        const formResponse = getFormResponse(formData);
+        formResponse.then(resp => resp.json()).then(data => {
             changeFormStatus(false);
             document.querySelector(`.dev-help-box span[data-value="title"]`).textContent = `Title: ${data.title}`;
             document.querySelector(`.dev-help-box span[data-value="message"]`).textContent = `Message: ${data.message}`;
@@ -23,11 +25,11 @@ function onFormTextareaKeydownHandler(evt) {
     }
 }
 
-function getResponse(requestData) {
+function getFormResponse(formRequestData) {
     return fetch(AJAX_URL, {
         method: `POST`,
         credentials: `same-origin`,
-        body: requestData
+        body: formRequestData
     });
 }
 
@@ -44,12 +46,12 @@ function changeFormStatus(isDisabled = false) {
     }
 }
 
-function getLocalStorageNtlId(localStorageNtlIdName) {
-    return localStorage.getItem(`localStorageNtlIdName`);
+function getLocalStorageNltId(localStorageNltIdName) {
+    return localStorage.getItem(`localStorageNltIdName`);
 }
 
-function setLocalStorageNtlId(localStorageNtlIdName, localStorageNtlIdValue) {
-    localStorage.setItem(localStorageNtlIdName, localStorageNtlIdValue);
+function setLocalStorageNltId(localStorageNltIdName, localStorageNltIdValue) {
+    localStorage.setItem(localStorageNltIdName, localStorageNltIdValue);
 }
 
 function generateTimestamp() {
@@ -121,21 +123,23 @@ const RULES = [
         content: [`<b>As a rule, start a new section after every 1-2 sentences. That means add a line break.</b>`, `Then write your next line (as demonstrated here).`]
     }
 ];
-const LOCAL_STORAGE_NTL_ID_NAME = `ntl-id`;
+const LOCAL_STORAGE_NTL_ID_NAME = `nlt-id`;
+const KEY_CODE_NAME = `Enter`;
+const WORDPRESS_AJAX_ACTION_NAME = `nlt`;
 
 const form = document.querySelector(`.dev-form`);
 const formSubmitButton = document.querySelector(`.dev-form__button`);
 const formTextarea = document.querySelector(`.dev-form__textarea`);
+const formSubjectInput = document.querySelector(`input[name="subject"]`);
 
 // EVENTS
 document.addEventListener(`DOMContentLoaded`, () => {
+    // LOCAL STORAGE DATA
+    if (!getLocalStorageNltId(LOCAL_STORAGE_NLT_ID_NAME)) {
+        // CREATING LOCAL STORAGE NTL ID
+        setLocalStorageNltId(LOCAL_STORAGE_NLT_ID_NAME, generateTimestamp());
+    }
     if (formTextarea) {
         formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
-    }
-    // LOCAL STORAGE DATA
-    const localStorageNtlId = getLocalStorageNtlId(LOCAL_STORAGE_NTL_ID_NAME);
-    if (!localStorageNtlId) {
-        // CREATING LOCAL STORAGE NTL ID
-        setLocalStorageNtlId(LOCAL_STORAGE_NTL_ID_NAME, generateTimestamp());
     }
 });
