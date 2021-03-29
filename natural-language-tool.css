@@ -35,11 +35,19 @@
 }
 .dev-form__input[type="text"] {
     border-radius: 5px;
+    border: 1px solid #eee;
+    padding: 0 15px;
 }
 .dev-form__textarea {
     height: 100px;
     border-radius: 5px;
     resize: vertical;
+    border: 1px solid #eee;
+    padding: 10px 15px;
+}
+.dev-form__textarea:focus {
+    border-color: #ccc;
+    outline-style: none;
 }
 .dev-form__button {
     margin-top: 15px;
