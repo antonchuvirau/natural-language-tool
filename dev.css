@@ -1,0 +1,54 @@
+/* VARIABLES */
+:root {}
+.dev-box {
+    display: flex;
+    padding: 50px 0;
+}
+.dev-box__form {
+    width: 60%;
+}
+.dev-form__row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+.dev-form__row:last-child {
+    margin-bottom: 0;
+}
+.dev-box__help {
+    width: calc(40% - 30px);
+    margin-left: 30px;
+}
+.dev-help-box {
+    background: #eee;
+}
+.dev-help-box span {
+    display: block;
+}
+.dev-form {
+    display: flex;
+    flex-direction: column;
+}
+.dev-form label {
+    display: block;
+    margin-bottom: 3px;
+}
+.dev-form__input[type="text"] {
+    border-radius: 5px;
+}
+.dev-form__textarea {
+    height: 100px;
+    border-radius: 5px;
+    resize: vertical;
+}
+.dev-form__button {
+    margin-top: 15px;
+}
+.dev-form__button_progress {
+    opacity: .5;
+    pointer-events: none;
+}
+.dev-form_disabled {
+    pointer-events: none;
+    opacity: .6;
+}
