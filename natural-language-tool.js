@@ -76,7 +76,7 @@ function parseFormResponse(resultsData) {
     const isValid = resultsData.result;
 
     if (!isValid) {
-        formTextarea.innerHTML = `<p>${resultsData.message}<span class="light"></span></p>`;
+        formTextarea.innerHTML = `<p>Hello!<span class="light" data-message="${resultsData.message}"></span></p>`;
     }
 }
 

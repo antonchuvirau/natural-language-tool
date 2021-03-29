@@ -37,9 +37,10 @@
     border-radius: 5px;
     border: 1px solid #eee;
     padding: 0 15px;
+    height: 45px;
 }
 .dev-form__textarea {
-    height: 100px;
+    height: 300px;
     border-radius: 5px;
     resize: vertical;
     border: 1px solid #eee;
@@ -59,4 +60,17 @@
 .dev-form_disabled {
     pointer-events: none;
     opacity: .6;
+}
+.light {
+    display: inline-block;
+    width: 12px;
+    height: 16px;
+    background: url('../img/icons/light.svg') no-repeat 50% / 12px auto;
+    margin-left: 10px;
+    vertical-align: baseline;
+    opacity: .5;
+    cursor: pointer;
+}
+.light:hover {
+    opacity: 1;
 }
