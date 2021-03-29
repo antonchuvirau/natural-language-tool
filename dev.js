@@ -1,5 +1,6 @@
 'use strict';
 
+// FUNCTIONS
 function onFormTextareaKeydownHandler(evt) {
     const keyCode = evt.code;
 
@@ -43,6 +44,7 @@ function changeFormStatus(isDisabled = false) {
     }
 }
 
+// VARIABLES
 const AJAX_URL = `https://rubineducation.com/wp-admin/admin-ajax.php`;
 const RULES = [
     {
@@ -112,6 +114,7 @@ const form = document.querySelector(`.dev-form`);
 const formSubmitButton = document.querySelector(`.dev-form__button`);
 const formTextarea = document.querySelector(`.dev-form__textarea`);
 
+// EVENTS
 document.addEventListener(`DOMContentLoaded`, () => {
     if (formTextarea) {
         formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
