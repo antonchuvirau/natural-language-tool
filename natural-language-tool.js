@@ -32,7 +32,12 @@ function onDocumentClickHandler(evt) {
     const target = evt.target;
 
     if (target.matches(`.light-box__icon`)) {
+        target.classList.add(`light-box__icon_active`);
         target.nextElementSibling.classList.toggle(`light-box__list_active`);
+    }
+    if (!target.closest(`.light-box`)) {
+        formTextarea.querySelector(`.light-box__icon`).classList.remove(`light-box__icon_active`);
+        formTextarea.querySelector(`.light-box__list`).classList.remove(`light-box__list_active`);
     }
 }
 
@@ -173,9 +178,9 @@ document.addEventListener(`DOMContentLoaded`, () => {
         setLocalStorageNltId(LOCAL_STORAGE_NLT_ID_NAME, generateTimestamp());
     }
     if (form) {
+        document.addEventListener(`click`, onDocumentClickHandler);
         document.execCommand("defaultParagraphSeparator", false, "p");
         form.addEventListener(`submit`, onFormSubmitHandler);
         formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
     }
 });
-document.addEventListener(`click`, onDocumentClickHandler);

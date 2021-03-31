@@ -87,6 +87,9 @@
 .light-box__icon:hover {
     opacity: 1;
 }
+.light-box__icon_active {
+    opacity: 1;
+}
 .light-box__list {
     position: absolute;
     bottom: calc(100% + 5px);
