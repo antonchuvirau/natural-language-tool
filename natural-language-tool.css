@@ -40,6 +40,9 @@
     height: 45px;
 }
 .dev-form__textarea {
+    /* display: flex;
+    flex-direction: column;
+    align-items: flex-start; */
     height: 300px;
     border-radius: 5px;
     resize: vertical;
@@ -61,16 +64,80 @@
     pointer-events: none;
     opacity: .6;
 }
-.light {
+.dev-form__textarea p {
+    margin: 0;
+    margin-bottom: 15px;
+}
+.dev-form__textarea p:last-child {
+    margin-bottom: 0;
+}
+.light-box {
+    position: relative;
     display: inline-block;
+    margin-left: 10px;
+    vertical-align: baseline;
+}
+.light-box__icon {
     width: 12px;
     height: 16px;
     background: url('../img/icons/light.svg') no-repeat 50% / 12px auto;
-    margin-left: 10px;
-    vertical-align: baseline;
     opacity: .5;
     cursor: pointer;
 }
-.light:hover {
+.light-box__icon:hover {
     opacity: 1;
+}
+.light-box__list {
+    position: absolute;
+    bottom: calc(100% + 5px);
+    left: -5px;
+    box-shadow: 4px 4px 10px 0 rgba(39, 39, 39, .15);
+    border-radius: 5px;
+    background: #fff;
+    transform: translateY(-5px);
+    opacity: 0;
+    transition: opacity .25s ease, transform .25s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+.light-box__list_active {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+}
+.light-box__list-item {
+    white-space: nowrap;
+    padding: 5px 10px;
+}
+.light-box__list-item:first-child {
+    display: flex;
+    align-items: flex-start;
+    background: #F9F9F9;
+    border-radius: 5px 5px 0px 0px;
+}
+.light-box__list-item:first-child p {
+    letter-spacing: 0.05em;
+    color: #b9b9b9;
+    text-transform: uppercase;
+    font-size: 10px;
+    margin: 0;
+}
+.light-box__list-item:first-child button {
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #423E37;
+    background: none;
+    font-weight: 600;
+    font-size: 10px;
+    margin-left: auto;
+    -webkit-appearance: none;
+    appearance: none;
+    border: none;
+    box-shadow: none;
+}
+.light-box__list-item:last-child {
+    background: #0D61C0;
+    border-radius: 0px 0px 5px 5px;
+    color: #fff;
+    font-weight: 600;
 }

@@ -2,7 +2,9 @@
 
 // FUNCTIONS
 function onFormTextareaKeydownHandler(evt) {
+    const target = evt.target;
     const keyCode = evt.code;
+    console.log(target);
 
     if (keyCode === KEY_CODE_NAME) {
         changeFormStatus(true);
@@ -76,10 +78,9 @@ function parseFormResponse(resultsData) {
     const isValid = resultsData.result;
 
     if (!isValid) {
-        document.execCommand('selectAll', false, null);
-        document.execCommand('delete', false, null);
-        document.execCommand('insertHTML', false, `<p>Hello!<span class=\"light\" data-message=\"${resultsData.message}\"></span></p>`);
-        document.execCommand('insertHTML', false, `<br/>`);
+        document.execCommand(`selectAll`, false, null);
+        document.execCommand(`delete`, false, null);
+        document.execCommand(`insertHTML`, false, `<div class="text-paragraph">Example<div class="light-box"><div class="light-box__icon"></div><ul class="light-box__list"><li class="light-box__list-item"><p>Suggestions</p><button type="button">Learn the rule</button></li><li class="light-box__list-item">${resultsData.message}</li></ul></div></div>`);
     }
 }
 
@@ -158,13 +159,13 @@ const formSubjectInput = document.querySelector(`input[name="subject"]`);
 
 // EVENTS
 document.addEventListener(`DOMContentLoaded`, () => {
-    // document.execCommand("defaultParagraphSeparator", false, "p");
     // LOCAL STORAGE DATA
     if (!getLocalStorageNltId(LOCAL_STORAGE_NLT_ID_NAME)) {
         // CREATING LOCAL STORAGE NTL ID
         setLocalStorageNltId(LOCAL_STORAGE_NLT_ID_NAME, generateTimestamp());
     }
     if (form) {
+        document.execCommand("defaultParagraphSeparator", false, "p");
         form.addEventListener(`submit`, onFormSubmitHandler);
         formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
     }
