@@ -98,6 +98,7 @@
     opacity: 0;
     transition: opacity .25s ease, transform .25s ease;
     pointer-events: none;
+    user-select: none;
     z-index: 1;
 }
 .light-box__list_active {

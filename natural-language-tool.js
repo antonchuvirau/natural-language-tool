@@ -28,6 +28,14 @@ function onFormSubmitHandler(evt) {
     }).catch(error => alert(error));
 }
 
+function onDocumentClickHandler(evt) {
+    const target = evt.target;
+
+    if (target.matches(`.light-box__icon`)) {
+        target.nextElementSibling.classList.toggle(`light-box__list_active`);
+    }
+}
+
 function getFormData() {
     const formTextareaContent = formTextarea.value;
     const formSubjectContent = formSubjectInput.value;
@@ -170,3 +178,4 @@ document.addEventListener(`DOMContentLoaded`, () => {
         formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
     }
 });
+document.addEventListener(`click`, onDocumentClickHandler);
