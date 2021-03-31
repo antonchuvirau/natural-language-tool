@@ -93,7 +93,7 @@ function parseFormResponse(resultsData) {
     if (!isValid) {
         document.execCommand(`selectAll`, false, null);
         document.execCommand(`delete`, false, null);
-        document.execCommand(`insertHTML`, false, `<div class="text-paragraph">Example<div class="light-box"><div class="light-box__icon"></div><ul class="light-box__list"><li class="light-box__list-item"><p>Suggestions</p><button type="button">Learn the rule</button></li><li class="light-box__list-item">${resultsData.message}</li></ul></div></div>`);
+        document.execCommand(`insertHTML`, false, `<div class="text-paragraph">Example<div class="light-box"><div class="light-box__icon"></div><ul class="light-box__list"><li class="light-box__list-item"><p>Suggestions</p><button type="button">Learn the rule</button></li><li class="light-box__list-item">${resultsData.message}</li></ul></div></div><br/>`);
     }
 }
 
