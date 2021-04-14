@@ -1,20 +1,36 @@
 'use strict';
 
+// PLUGINS
+/*
+    A simple jQuery modal (http://github.com/kylefox/jquery-modal)
+    Version 0.9.1
+*/
+!function(o){"object"==typeof module&&"object"==typeof module.exports?o(require("jquery"),window,document):o(jQuery,window,document)}(function(o,t,i,e){var s=[],l=function(){return s.length?s[s.length-1]:null},n=function(){var o,t=!1;for(o=s.length-1;o>=0;o--)s[o].$blocker&&(s[o].$blocker.toggleClass("current",!t).toggleClass("behind",t),t=!0)};o.modal=function(t,i){var e,n;if(this.$body=o("body"),this.options=o.extend({},o.modal.defaults,i),this.options.doFade=!isNaN(parseInt(this.options.fadeDuration,10)),this.$blocker=null,this.options.closeExisting)for(;o.modal.isActive();)o.modal.close();if(s.push(this),t.is("a"))if(n=t.attr("href"),this.anchor=t,/^#/.test(n)){if(this.$elm=o(n),1!==this.$elm.length)return null;this.$body.append(this.$elm),this.open()}else this.$elm=o("<div>"),this.$body.append(this.$elm),e=function(o,t){t.elm.remove()},this.showSpinner(),t.trigger(o.modal.AJAX_SEND),o.get(n).done(function(i){if(o.modal.isActive()){t.trigger(o.modal.AJAX_SUCCESS);var s=l();s.$elm.empty().append(i).on(o.modal.CLOSE,e),s.hideSpinner(),s.open(),t.trigger(o.modal.AJAX_COMPLETE)}}).fail(function(){t.trigger(o.modal.AJAX_FAIL);var i=l();i.hideSpinner(),s.pop(),t.trigger(o.modal.AJAX_COMPLETE)});else this.$elm=t,this.anchor=t,this.$body.append(this.$elm),this.open()},o.modal.prototype={constructor:o.modal,open:function(){var t=this;this.block(),this.anchor.blur(),this.options.doFade?setTimeout(function(){t.show()},this.options.fadeDuration*this.options.fadeDelay):this.show(),o(i).off("keydown.modal").on("keydown.modal",function(o){var t=l();27===o.which&&t.options.escapeClose&&t.close()}),this.options.clickClose&&this.$blocker.click(function(t){t.target===this&&o.modal.close()})},close:function(){s.pop(),this.unblock(),this.hide(),o.modal.isActive()||o(i).off("keydown.modal")},block:function(){this.$elm.trigger(o.modal.BEFORE_BLOCK,[this._ctx()]),this.$body.css("overflow","hidden"),this.$blocker=o('<div class="'+this.options.blockerClass+' blocker current"></div>').appendTo(this.$body),n(),this.options.doFade&&this.$blocker.css("opacity",0).animate({opacity:1},this.options.fadeDuration),this.$elm.trigger(o.modal.BLOCK,[this._ctx()])},unblock:function(t){!t&&this.options.doFade?this.$blocker.fadeOut(this.options.fadeDuration,this.unblock.bind(this,!0)):(this.$blocker.children().appendTo(this.$body),this.$blocker.remove(),this.$blocker=null,n(),o.modal.isActive()||this.$body.css("overflow",""))},show:function(){this.$elm.trigger(o.modal.BEFORE_OPEN,[this._ctx()]),this.options.showClose&&(this.closeButton=o('<a href="#close-modal" rel="modal:close" class="close-modal '+this.options.closeClass+'">'+this.options.closeText+"</a>"),this.$elm.append(this.closeButton)),this.$elm.addClass(this.options.modalClass).appendTo(this.$blocker),this.options.doFade?this.$elm.css({opacity:0,display:"inline-block"}).animate({opacity:1},this.options.fadeDuration):this.$elm.css("display","inline-block"),this.$elm.trigger(o.modal.OPEN,[this._ctx()])},hide:function(){this.$elm.trigger(o.modal.BEFORE_CLOSE,[this._ctx()]),this.closeButton&&this.closeButton.remove();var t=this;this.options.doFade?this.$elm.fadeOut(this.options.fadeDuration,function(){t.$elm.trigger(o.modal.AFTER_CLOSE,[t._ctx()])}):this.$elm.hide(0,function(){t.$elm.trigger(o.modal.AFTER_CLOSE,[t._ctx()])}),this.$elm.trigger(o.modal.CLOSE,[this._ctx()])},showSpinner:function(){this.options.showSpinner&&(this.spinner=this.spinner||o('<div class="'+this.options.modalClass+'-spinner"></div>').append(this.options.spinnerHtml),this.$body.append(this.spinner),this.spinner.show())},hideSpinner:function(){this.spinner&&this.spinner.remove()},_ctx:function(){return{elm:this.$elm,$elm:this.$elm,$blocker:this.$blocker,options:this.options}}},o.modal.close=function(t){if(o.modal.isActive()){t&&t.preventDefault();var i=l();return i.close(),i.$elm}},o.modal.isActive=function(){return s.length>0},o.modal.getCurrent=l,o.modal.defaults={closeExisting:!0,escapeClose:!0,clickClose:!0,closeText:"Close",closeClass:"",modalClass:"modal",blockerClass:"jquery-modal",spinnerHtml:'<div class="rect1"></div><div class="rect2"></div><div class="rect3"></div><div class="rect4"></div>',showSpinner:!0,showClose:!0,fadeDuration:null,fadeDelay:1},o.modal.BEFORE_BLOCK="modal:before-block",o.modal.BLOCK="modal:block",o.modal.BEFORE_OPEN="modal:before-open",o.modal.OPEN="modal:open",o.modal.BEFORE_CLOSE="modal:before-close",o.modal.CLOSE="modal:close",o.modal.AFTER_CLOSE="modal:after-close",o.modal.AJAX_SEND="modal:ajax:send",o.modal.AJAX_SUCCESS="modal:ajax:success",o.modal.AJAX_FAIL="modal:ajax:fail",o.modal.AJAX_COMPLETE="modal:ajax:complete",o.fn.modal=function(t){return 1===this.length&&new o.modal(this,t),this},o(i).on("click.modal",'a[rel~="modal:close"]',o.modal.close),o(i).on("click.modal",'a[rel~="modal:open"]',function(t){t.preventDefault(),o(this).modal()})});
+
 // FUNCTIONS
 function onFormTextareaKeydownHandler(evt) {
-    const target = evt.target;
     const keyCode = evt.code;
-    console.log(target);
 
     if (keyCode === KEY_CODE_NAME) {
-        changeFormStatus(true);
-        // SENDING DATA TO THE SERVER
-        const formResponse = getFormResponse(getFormData());
-        formResponse.then(resp => resp.json()).then(data => {
-            changeFormStatus(false);
-            parseFormResponse(data);
-        }).catch(error => alert(error));
+        if (checkFormSubject(formSubjectInput)) {
+            changeFormStatus(true);
+            // SENDING DATA TO THE SERVER
+            const formResponse = getFormResponse(getFormData());
+            formResponse.then(resp => resp.json()).then(data => {
+                changeFormStatus(false);
+                parseFormResponse(data);
+            }).catch(error => alert(error));
+        }
     }
+}
+
+function checkFormSubject(subjectInput) {
+    if (!subjectInput.value) {
+        subjectInput.classList.add(`dev-form__input_empty`);
+        return;
+    }
+    subjectInput.classList.remove(`dev-form__input_empty`);
+    return true;
 }
 
 function onFormSubmitHandler(evt) {
@@ -31,25 +47,25 @@ function onFormSubmitHandler(evt) {
 function onDocumentClickHandler(evt) {
     const target = evt.target;
 
-    if (target.matches(`.light-box__icon`)) {
-        target.classList.add(`light-box__icon_active`);
-        target.nextElementSibling.classList.toggle(`light-box__list_active`);
+    if (target.matches(`.light-bulb__icon`)) {
+        formTextarea.removeAttribute(`contenteditable`);
+        target.classList.add(`light-bulb__icon_active`);
+        target.nextElementSibling.classList.toggle(`light-bulb__content_active`);
     }
-    if (!target.closest(`.light-box`)) {
-        formTextarea.querySelector(`.light-box__icon`).classList.remove(`light-box__icon_active`);
-        formTextarea.querySelector(`.light-box__list`).classList.remove(`light-box__list_active`);
+    if (lightBulbElementCollection.length && !target.closest(`.light-bulb`)) {
+        formTextarea.setAttribute(`contenteditable`, true);
+        formTextarea.querySelector(`.light-bulb__icon`).classList.remove(`light-bulb__icon_active`);
+        formTextarea.querySelector(`.light-bulb__content`).classList.remove(`light-bulb__content_active`);
     }
 }
 
 function getFormData() {
-    const formTextareaContent = formTextarea.value;
-    const formSubjectContent = formSubjectInput.value;
     // CREATING FORM DATA OBJECT
     const formData = new FormData();
     formData.set(`action`, WORDPRESS_AJAX_ACTION_NAME);
     formData.set(`id`, getLocalStorageNltId(LOCAL_STORAGE_NLT_ID_NAME));
-    formData.set(`content`, formTextareaContent);
-    formData.set(`subject`, formSubjectContent);
+    formData.set(`content`, formTextarea.textContent);
+    formData.set(`subject`, formSubjectInput.value);
     return formData;
 }
 
@@ -93,7 +109,7 @@ function parseFormResponse(resultsData) {
     if (!isValid) {
         document.execCommand(`selectAll`, false, null);
         document.execCommand(`delete`, false, null);
-        document.execCommand(`insertHTML`, false, `<div class="text-paragraph">Example<div class="light-box"><div class="light-box__icon"></div><ul class="light-box__list"><li class="light-box__list-item"><p>Suggestions</p><button type="button">Learn the rule</button></li><li class="light-box__list-item">${resultsData.message}</li></ul></div></div><br/>`);
+        document.execCommand(`insertHTML`, false, `<div>${resultsData.body}<div class="light-bulb"><div class="light-bulb__icon"></div><div class="light-bulb__content"><div class="light-bulb__header"><p class="light-bulb__header-title">Suggestions</p><button class="light-bulb__header-button" data-rule-index="0" data-modal="#description" type="button">Learn the rule</button></div><ul class="light-bulb__list"><li class="light-bulb__list-item">${resultsData.message}</li></ul></div></div></div>`);
     }
 }
 
@@ -169,6 +185,7 @@ const form = document.querySelector(`.dev-form`);
 const formSubmitButton = document.querySelector(`.dev-form__button`);
 const formTextarea = document.querySelector(`.dev-form__textarea`);
 const formSubjectInput = document.querySelector(`input[name="subject"]`);
+const lightBulbElementCollection = document.querySelectorAll(`.light-bulb`);
 
 // EVENTS
 document.addEventListener(`DOMContentLoaded`, () => {
@@ -183,4 +200,14 @@ document.addEventListener(`DOMContentLoaded`, () => {
         form.addEventListener(`submit`, onFormSubmitHandler);
         formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
     }
+});
+
+// JQUERY
+jQuery(document).ready(function() {
+    jQuery(function() {
+        jQuery('[data-modal]').on('click', function() {
+          jQuery(jQuery(this).data('modal')).modal();
+          return false;
+        });
+      });
 });
