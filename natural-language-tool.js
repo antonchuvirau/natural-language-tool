@@ -48,14 +48,23 @@ function onDocumentClickHandler(evt) {
     const target = evt.target;
 
     if (target.matches(`.light-bulb__icon`)) {
-        formTextarea.removeAttribute(`contenteditable`);
-        target.classList.add(`light-bulb__icon_active`);
-        target.nextElementSibling.classList.toggle(`light-bulb__content_active`);
-    }
-    if (lightBulbElementCollection.length && !target.closest(`.light-bulb`)) {
+        if (!target.classList.contains(`light-bulb__icon_active`)) {
+            disableLightBulbPopups();
+            formTextarea.removeAttribute(`contenteditable`);
+            target.classList.add(`light-bulb__icon_active`);
+            target.nextElementSibling.classList.toggle(`light-bulb__content_active`);
+            return;
+        }
         formTextarea.setAttribute(`contenteditable`, true);
-        formTextarea.querySelector(`.light-bulb__icon`).classList.remove(`light-bulb__icon_active`);
-        formTextarea.querySelector(`.light-bulb__content`).classList.remove(`light-bulb__content_active`);
+        target.classList.remove(`light-bulb__icon_active`);
+        target.nextElementSibling.classList.remove(`light-bulb__content_active`);
+    }
+    if (!target.closest(`.light-bulb`)) {
+        const lightBulbElementCollection = document.querySelectorAll(`.light-bulb`);
+        if (lightBulbElementCollection.length) {
+            disableLightBulbPopups();
+            formTextarea.setAttribute(`contenteditable`, true);
+        }
     }
 }
 
@@ -111,6 +120,15 @@ function parseFormResponse(resultsData) {
         document.execCommand(`delete`, false, null);
         document.execCommand(`insertHTML`, false, `<div>${resultsData.body}<div class="light-bulb"><div class="light-bulb__icon"></div><div class="light-bulb__content"><div class="light-bulb__header"><p class="light-bulb__header-title">Suggestions</p><button class="light-bulb__header-button" data-rule-index="0" data-modal="#description" type="button">Learn the rule</button></div><ul class="light-bulb__list"><li class="light-bulb__list-item">${resultsData.message}</li></ul></div></div></div>`);
     }
+}
+
+function disableLightBulbPopups() {
+    const lightBulbElementCollection = document.querySelectorAll(`.light-bulb`);
+    for (const lightBulbElement of lightBulbElementCollection) {
+        lightBulbElement.querySelector(`.light-bulb__icon`).classList.remove(`light-bulb__icon_active`);
+        lightBulbElement.querySelector(`.light-bulb__content`).classList.remove(`light-bulb__content_active`);
+    }
+
 }
 
 // VARIABLES
@@ -185,7 +203,6 @@ const form = document.querySelector(`.dev-form`);
 const formSubmitButton = document.querySelector(`.dev-form__button`);
 const formTextarea = document.querySelector(`.dev-form__textarea`);
 const formSubjectInput = document.querySelector(`input[name="subject"]`);
-const lightBulbElementCollection = document.querySelectorAll(`.light-bulb`);
 
 // EVENTS
 document.addEventListener(`DOMContentLoaded`, () => {

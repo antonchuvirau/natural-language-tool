@@ -54,14 +54,13 @@ input[type="text"].dev-form__input_empty {
     border-color: red;
 }
 .dev-form__textarea {
-    /* display: flex;
-    flex-direction: column;
-    align-items: flex-start; */
     height: 300px;
     border-radius: 5px;
     resize: vertical;
     border: 1px solid #eee;
-    padding: 10px 15px;
+    padding: 15px 20px;
+    font-size: 15px;
+    color: var(--dark);
 }
 .dev-form__textarea:focus {
     border-color: #ccc;
@@ -85,6 +84,7 @@ input[type="text"].dev-form__input_empty {
 .dev-form__textarea p:last-child {
     margin-bottom: 0;
 }
+/* LIGHT BULB STYLES */
 .light-bulb {
     position: relative;
     display: inline-block;
@@ -116,7 +116,7 @@ input[type="text"].dev-form__input_empty {
     transition: opacity .25s ease, transform .25s ease;
     pointer-events: none;
     user-select: none;
-    width: 650px;
+    width: 450px;
     z-index: 9999;
 }
 .light-bulb__content_active {
