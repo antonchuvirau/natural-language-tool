@@ -23,32 +23,62 @@ function onFormTextareaKeydownHandler(evt) {
         }
     }
 }
-
 function checkFormSubject(subjectInput) {
     if (!subjectInput.value) {
-        subjectInput.classList.add(`dev-form__input_empty`);
+        subjectInput.classList.add(`b-form__input_empty`);
         return;
     }
-    subjectInput.classList.remove(`dev-form__input_empty`);
+    subjectInput.classList.remove(`b-form__input_empty`);
     return true;
 }
-
 function onFormSubmitHandler(evt) {
     evt.preventDefault();
-    changeFormStatus(true);
-    // SENDING DATA TO THE SERVER
-    const formResponse = getFormResponse(getFormData());
-    formResponse.then(resp => resp.json()).then(data => {
-        changeFormStatus(false);
-        parseFormResponse(data);
-    }).catch(error => alert(error));
+    if (evt.type === `submit`) {
+        changeFormStatus(true);
+        // SENDING DATA TO THE SERVER
+        const formResponse = getFormResponse(getFormData());
+        formResponse.then(resp => resp.json()).then(data => {
+            changeFormStatus(false);
+            parseFormResponse(data);
+        }).catch(error => alert(error));
+    }
 }
-
+function isLightBulbContent(lightBulbElement) {
+    return lightBulbElement.querySelector(`.light-bulb__content`) ? true : false;
+}
+function renderLightBulbContent(lightBulbElement) {
+    const lightBulbElementCollection = document.querySelectorAll(`.light-bulb`);
+    const lightBulbContentTemplate = document.querySelector(`#light-bulb-content`).content;
+    const lightBulbContentFragment = new DocumentFragment();
+    const clonedLightBulbContentTemplate = lightBulbContentTemplate.cloneNode(true);
+    const lightBulbElementIndex = getDOMElementIndex(lightBulbElement, lightBulbElementCollection);
+    // RENDER CONTENT
+    clonedLightBulbContentTemplate.querySelector(`.light-bulb__header-button`).setAttribute(`data-rule-index`, lightBulbElementIndex);
+    for (const contentItem of TEST_RESPONSE.content.messages[lightBulbElementIndex].examples) {
+        const liTag = document.createElement(`li`);
+        liTag.classList.add(`light-bulb__list-item`);
+        liTag.textContent = contentItem;
+        clonedLightBulbContentTemplate.querySelector(`.light-bulb__list`).appendChild(liTag);
+    }
+    const liTag = document.createElement(`li`);
+    liTag.classList.add(`light-bulb__list-item`);
+    liTag.textContent = TEST_RESPONSE.content.messages[lightBulbElementIndex].message;
+    clonedLightBulbContentTemplate.querySelector(`.light-bulb__list`).appendChild(liTag);
+    lightBulbContentFragment.appendChild(clonedLightBulbContentTemplate);
+    lightBulbElement.appendChild(lightBulbContentFragment);
+}
 function onDocumentClickHandler(evt) {
     const target = evt.target;
 
     if (target.matches(`.light-bulb__icon`)) {
         if (!target.classList.contains(`light-bulb__icon_active`)) {
+            if (!isLightBulbContent(target.closest(`.light-bulb`))) {
+                renderLightBulbContent(target.closest(`.light-bulb`));
+                formTextarea.removeAttribute(`contenteditable`);
+                target.classList.add(`light-bulb__icon_active`);
+                target.nextElementSibling.classList.toggle(`light-bulb__content_active`);
+                return;
+            }
             disableLightBulbPopups();
             formTextarea.removeAttribute(`contenteditable`);
             target.classList.add(`light-bulb__icon_active`);
@@ -59,25 +89,26 @@ function onDocumentClickHandler(evt) {
         target.classList.remove(`light-bulb__icon_active`);
         target.nextElementSibling.classList.remove(`light-bulb__content_active`);
     }
-    if (!target.closest(`.light-bulb`)) {
+    if (!target.closest(`.light-bulb`) && !target.closest(`.blocker`)) {
         const lightBulbElementCollection = document.querySelectorAll(`.light-bulb`);
         if (lightBulbElementCollection.length) {
             disableLightBulbPopups();
             formTextarea.setAttribute(`contenteditable`, true);
         }
     }
+    if (target.matches(`.light-bulb__header-button`)) {
+        jQuery('#rule-description').modal();
+    }
 }
-
 function getFormData() {
     // CREATING FORM DATA OBJECT
     const formData = new FormData();
     formData.set(`action`, WORDPRESS_AJAX_ACTION_NAME);
-    formData.set(`id`, getLocalStorageNltId(LOCAL_STORAGE_NLT_ID_NAME));
+    formData.set(`id`, getCookie(COOKIE_ID_NAME));
     formData.set(`content`, formTextarea.textContent);
     formData.set(`subject`, formSubjectInput.value);
     return formData;
 }
-
 function getFormResponse(formRequestData) {
     return fetch(AJAX_URL, {
         method: `POST`,
@@ -85,43 +116,33 @@ function getFormResponse(formRequestData) {
         body: formRequestData
     });
 }
-
 function changeFormStatus(isDisabled = false) {
     if (isDisabled) {
         formSubmitButton.textContent = `Sending...`;
-        formSubmitButton.classList.add(`dev-form__button_progress`);
-        form.classList.add(`dev-form_disabled`);
+        formSubmitButton.classList.add(`b-form__button_progress`);
+        form.classList.add(`b-form_disabled`);
     }
     else {
         formSubmitButton.textContent = `Send`;
-        formSubmitButton.classList.remove(`dev-form__button_progress`);
-        form.classList.remove(`dev-form_disabled`);
+        formSubmitButton.classList.remove(`b-form__button_progress`);
+        form.classList.remove(`b-form_disabled`);
     }
 }
-
-function getLocalStorageNltId(localStorageNltIdName) {
-    return localStorage.getItem(localStorageNltIdName);
-}
-
-function setLocalStorageNltId(localStorageNltIdName, localStorageNltIdValue) {
-    localStorage.setItem(localStorageNltIdName, localStorageNltIdValue);
-}
-
-function generateTimestamp() {
+function getTimestamp() {
     const dateNow = new Date();
     return dateNow.getTime();
 }
-
-function parseFormResponse(resultsData) {
-    const isValid = resultsData.result;
-
-    if (!isValid) {
-        document.execCommand(`selectAll`, false, null);
-        document.execCommand(`delete`, false, null);
-        document.execCommand(`insertHTML`, false, `<div>${resultsData.body}<div class="light-bulb"><div class="light-bulb__icon"></div><div class="light-bulb__content"><div class="light-bulb__header"><p class="light-bulb__header-title">Suggestions</p><button class="light-bulb__header-button" data-rule-index="0" data-modal="#description" type="button">Learn the rule</button></div><ul class="light-bulb__list"><li class="light-bulb__list-item">${resultsData.message}</li></ul></div></div></div>`);
-    }
+function replaceAllNLPTags(NLPTagsCollection) {
+    return NLPTagsCollection.replaceAll(REGEX_NLT, (replacement) => {
+        const replacementIndex = replacement.match(/\d{1}/);
+        return getLightBulbHTMLTemplate(replacementIndex);
+    });
 }
-
+function parseFormResponse(resultsData) {
+    document.execCommand(`selectAll`, false, null);
+    document.execCommand(`delete`, false, null);
+    document.execCommand(`insertHTML`, false, replaceAllNLPTags(resultsData.content.text));
+}
 function disableLightBulbPopups() {
     const lightBulbElementCollection = document.querySelectorAll(`.light-bulb`);
     for (const lightBulbElement of lightBulbElementCollection) {
@@ -129,6 +150,35 @@ function disableLightBulbPopups() {
         lightBulbElement.querySelector(`.light-bulb__content`).classList.remove(`light-bulb__content_active`);
     }
 
+}
+function getDOMElementIndex(DOMElement, DOMElementCollection) {
+    return Array.from(DOMElementCollection).findIndex((DOMElementItem) => DOMElementItem === DOMElement);
+}
+function getCookie(name) {
+    const matches = document.cookie.match(new RegExp(
+        "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+function setCookie(name, value, options = {}) {
+    let updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
+    for (let optionKey in options) {
+        updatedCookie += "; " + optionKey;
+        let optionValue = options[optionKey];
+        if (optionValue !== true) {
+            updatedCookie += "=" + optionValue;
+        }
+    }
+    document.cookie = updatedCookie;
+}
+function deleteCookie(name) {
+    setCookie(name, ``, {
+        path: `/`,
+        maxAge: -1
+    });
+}
+function getLightBulbHTMLTemplate(indexOfARule) {
+    return `<div data-rule-index="${indexOfARule}" class="light-bulb"><div class="light-bulb__icon">&nbsp;</div></div>`;
 }
 
 // VARIABLES
@@ -195,36 +245,50 @@ const RULES = [
         content: [`<b>As a rule, start a new section after every 1-2 sentences. That means add a line break.</b>`, `Then write your next line (as demonstrated here).`]
     }
 ];
-const LOCAL_STORAGE_NLT_ID_NAME = `nlt-id`;
+const TEST_RESPONSE = {
+    content: {
+        text: 'Hello<nlp></nlp>\r\n',
+        messages: [
+            {
+                message: 'Test',
+                examples: ['First', 'Second', 'Third']
+            }
+        ],
+        subject: 'Test subject',
+        session_id: 123
+    }
+};
+const COOKIE_ID_NAME = `nlt-id`;
 const KEY_CODE_NAME = `Enter`;
 const WORDPRESS_AJAX_ACTION_NAME = `nlt`;
+const REGEX_NLT = /<nlp>\d{1}<\/nlp>/ig;
+const COOKIE_SETTINGS = {
+    path: `/`,
+    secure: true,
+    maxAge: 3600,
+    sameSite: `lax`
+};
 
-const form = document.querySelector(`.dev-form`);
-const formSubmitButton = document.querySelector(`.dev-form__button`);
-const formTextarea = document.querySelector(`.dev-form__textarea`);
-const formSubjectInput = document.querySelector(`input[name="subject"]`);
+const form = document.querySelector(`.b-form__el`);
+const formSubmitButton = document.querySelector(`.b-form__button`);
+const formTextarea = document.querySelector(`.b-form__textarea`);
+const formSubjectInput = document.querySelector(`.b-form__input[name="subject"]`);
 
 // EVENTS
 document.addEventListener(`DOMContentLoaded`, () => {
-    // LOCAL STORAGE DATA
-    if (!getLocalStorageNltId(LOCAL_STORAGE_NLT_ID_NAME)) {
-        // CREATING LOCAL STORAGE NTL ID
-        setLocalStorageNltId(LOCAL_STORAGE_NLT_ID_NAME, generateTimestamp());
+    // CREATE COOKIE IF IT IS NOT EXIST
+    const sessionCookie = getCookie(COOKIE_ID_NAME);
+    if (!sessionCookie) {
+        setCookie(COOKIE_ID_NAME, getTimestamp(), COOKIE_SETTINGS);
     }
     if (form) {
         document.addEventListener(`click`, onDocumentClickHandler);
-        document.execCommand("defaultParagraphSeparator", false, "p");
+        document.execCommand("defaultParagraphSeparator", false, "div");
         form.addEventListener(`submit`, onFormSubmitHandler);
-        formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
+        // formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
     }
 });
-
-// JQUERY
-jQuery(document).ready(function() {
-    jQuery(function() {
-        jQuery('[data-modal]').on('click', function() {
-          jQuery(jQuery(this).data('modal')).modal();
-          return false;
-        });
-      });
+// DELETE COOKIA WHEN CLOSING A TAB
+window.addEventListener(`unload`, () => {
+    deleteCookie(COOKIE_ID_NAME);
 });

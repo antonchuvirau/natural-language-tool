@@ -5,96 +5,153 @@
 :root {
     --white: #fff;
     --primary: #0D61C0;
+    --secondary: #ffa200;
     --primary-100: #F8FBFF;
     --dark: #484E54;
     --dark-50: #f9f9f9;
     --dark-100: #b9b9b9;
     --dark-150: #737373;
 }
-.dev-box {
+.b-form {
     display: flex;
     padding: 50px 0;
 }
-.dev-box__form {
+.b-form__el {
     width: 100%;
 }
-.dev-form__row {
+.b-form__row {
     display: flex;
     flex-direction: column;
     margin-bottom: 15px;
 }
-.dev-form__row:last-child {
+.b-form__row:last-child {
     margin-bottom: 0;
 }
-.dev-box__help {
-    width: calc(40% - 30px);
-    margin-left: 30px;
-}
-.dev-help-box {
-    background: #eee;
-}
-.dev-help-box span {
-    display: block;
-}
-.dev-form {
+.b-form {
     display: flex;
     flex-direction: column;
 }
-.dev-form label {
+.b-form__label {
     display: block;
     margin-bottom: 3px;
+    font-size: 15px;
+    font-weight: 700;
 }
-.dev-form__input[type="text"] {
+input[type="text"].b-form__input {
     border-radius: 5px;
     border: 1px solid #eee;
     padding: 0 15px;
     height: 45px;
+    font-size: 16px !important;
 }
-input[type="text"].dev-form__input_empty {
+input[type="text"].b-form__input_empty {
     border-color: red;
 }
-.dev-form__textarea {
-    height: 300px;
+.b-form__textarea {
+    height: 250px;
     border-radius: 5px;
     resize: vertical;
     border: 1px solid #eee;
     padding: 15px 20px;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--dark);
+    /* overflow-y: auto; */
 }
-.dev-form__textarea:focus {
+.b-form__textarea:focus {
     border-color: #ccc;
     outline-style: none;
 }
-.dev-form__button {
-    margin-top: 15px;
+.b-form__button {
+    margin-top: 30px;
+    font-size: 15px;
+    border: none;
+    font-weight: bold;
+    padding: 10px 30px;
+    background: var(--primary);
+    color: var(--white);
+    border-radius: 5px;
 }
-.dev-form__button_progress {
+.b-form__button:hover {
+    opacity: .8;
+}
+.b-form__button_progress {
     opacity: .5;
     pointer-events: none;
 }
-.dev-form_disabled {
+.b-form_disabled {
     pointer-events: none;
     opacity: .6;
 }
-.dev-form__textarea p {
+.b-form__textarea p {
     margin: 0;
     margin-bottom: 15px;
 }
-.dev-form__textarea p:last-child {
+.b-form__textarea p:last-child {
     margin-bottom: 0;
+}
+.b-form__content {
+    margin-top: 30px;
+}
+.b-form__content p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.35;
+    margin-bottom: 10px;
+}
+.b-form__content p b {
+    font-weight: 700;
+}
+.b-form__content p:last-child {
+    margin-bottom: 0;
+}
+.blocker {
+    z-index: 9999;
+    background: rgba(0,0,0,.45);
+}
+.modal {
+    box-shadow: 4px 4px 10px 0 rgba(39, 39, 39, .15);
+}
+.modal a.close-modal {
+    top: 15px;
+    right: 15px;
+    width: 25px;
+    height: 25px;
+    background: url('../img/icons/cancel.svg') no-repeat 50% / 20px auto;
+}
+.modal#rule-description {
+    max-width: 700px;
+}
+.modal__grid {
+    padding: 40px 30px;
+}
+.modal__grid p, .modal__grid ul li {
+    font-size: 15px;
+    line-height: 1.45;
+}
+.modal__grid p, .modal__grid ul, .modal__grid ol {
+    margin: 0;
+}
+.modal__grid p:not(:last-child), .modal__grid ul:not(:last-child), .modal__grid ol:not(:last-child) {
+    margin-bottom: 15px;
 }
 /* LIGHT BULB STYLES */
 .light-bulb {
     position: relative;
     display: inline-block;
-    padding-left: 10px;
+    width: 20px;
+    height: 0;
     vertical-align: baseline;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 .light-bulb__icon {
-    width: 12px;
-    height: 16px;
-    background: url('../img/icons/light.svg') no-repeat 50% / 12px auto;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 25px;
+    background: url('../img/icons/light.svg') no-repeat right bottom / 12px auto;
     opacity: .5;
     cursor: pointer;
 }
@@ -106,8 +163,8 @@ input[type="text"].dev-form__input_empty {
 }
 .light-bulb__content {
     position: absolute;
-    bottom: calc(100% + 5px);
-    left: -5px;
+    bottom: 25px;
+    left: 0;
     box-shadow: 4px 4px 10px 0 rgba(39, 39, 39, .15);
     border-radius: 5px;
     background: var(--white);
@@ -117,7 +174,7 @@ input[type="text"].dev-form__input_empty {
     pointer-events: none;
     user-select: none;
     width: 450px;
-    z-index: 9999;
+    z-index: 999;
 }
 .light-bulb__content_active {
     opacity: 1;
@@ -136,7 +193,7 @@ input[type="text"].dev-form__input_empty {
     font-size: 14px;
     font-weight: 400;
 }
-.light-buld__list-item:nth-child(even) {
+.light-bulb__list-item:nth-child(even) {
     background: var(--primary-100);
 }
 .light-bulb__header {
