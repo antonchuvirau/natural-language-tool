@@ -73,6 +73,7 @@ function onDocumentClickHandler(evt) {
             if (!isLightBulbContent(target.closest(`.light-bulb`))) {
                 const targetParentElement = target.closest(`.light-bulb`);
                 const ruleIndex = targetParentElement.dataset.ruleIndex;
+                disableLightBulbPopups();
                 // RENDER LIGHT BULB'S CONTENT
                 renderLightBulbContent(targetParentElement, ruleIndex);
                 // DRY
@@ -89,6 +90,7 @@ function onDocumentClickHandler(evt) {
             return;
         }
         // DRY
+        disableLightBulbPopups();
         formTextarea.setAttribute(`contenteditable`, true);
         target.classList.remove(`light-bulb__icon_active`);
         target.nextElementSibling.classList.remove(`light-bulb__content_active`);
@@ -101,7 +103,11 @@ function onDocumentClickHandler(evt) {
         }
     }
     if (target.matches(`.light-bulb__header-button`)) {
+        const ruleIndex = target.dataset.ruleIndex;
+        const ruleContent = nltResultsData['learn_rules'][ruleIndex];
         jQuery('#rule-description').modal();
+        const ruleContentModal = document.querySelector(`.jquery-modal.current`).querySelector(`.modal__grid`);
+        ruleContentModal.textContent = ruleContent;
     }
 }
 function generateFormData() {
@@ -109,7 +115,8 @@ function generateFormData() {
     const formData = new FormData();
     formData.set(`action`, WORDPRESS_AJAX_ACTION_NAME);
     formData.set(`id`, getCookie(COOKIE_ID_NAME));
-    formData.set(`content`, formTextarea.textContent);
+    // formData.set(`content`, parseFormContent());
+    formData.set(`content`, `HELLO MS. Emma\nGood Afternoon\n\nI researched your website dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd and read all about your vision for Acme Apartment Complex.\nThe project looks fantastic, and I would love to observe and be part of the planning process.\n\nI\'m on the Big State University volleyball team, a peer mentor and also the president of my dorm.\n\nThanks so much, and I hope to hear from you.\n\nPh: 832-732-9526\nJane Doe\nMachanian in Google`);
     formData.set(`subject`, formSubjectInput.value);
     return formData;
 }
@@ -119,6 +126,17 @@ function getFormResponse(formRequestData) {
         credentials: `same-origin`,
         body: formRequestData
     });
+}
+function parseFormContent() {
+    const formContent = formTextarea.innerHTML;
+    const formContentChildNodes = formTextarea.childNodes;
+    const modifiedFormContent = formContent.replaceAll(/<div>.+<\/div>/ig, (replacement) => {
+        replacement = replacement.replaceAll(`<br>`, ``);
+        replacement = replacement.replaceAll(`<div>`, `\n`);
+        replacement = replacement.replaceAll(`</div>`, ``);
+        return replacement;
+    });
+    return modifiedFormContent;
 }
 function changeFormStatus(isDisabled = false) {
     if (isDisabled) {
@@ -136,31 +154,37 @@ function getTimestamp() {
     const dateNow = new Date();
     return dateNow.getTime();
 }
-function replaceAllNLPTags(NLPTagsCollection) {
-    return NLPTagsCollection.replaceAll(REGEX_NLT, (replacement) => {
-        const replacementIndex = replacement.match(/\d{1}/);
-        if (replacementIndex) {
-            return getLightBulbHTMLTemplate(replacementIndex);
-        }
+function renderLightBulbLayout(content) {
+    content = content.replaceAll(/\n|\r/g, `<br>`);
+    return content.replaceAll(/.+\S/ig, (replacement) => {
+        const result = replacement.replaceAll(/<nlp>\d{1}<\/nlp>/g, (innerItem) => {
+            const replacementIndex = innerItem.match(/\d{1}/g);
+            if (replacementIndex) {
+                return `${getLightBulbHTMLTemplate(replacementIndex)}`;
+            }
+        });
+        return `<div>${result}</div>`;
     });
 }
 function parseFormResponse(resultsData) {
     // MAKE RESULTS GLOBAL
     nltResultsData = resultsData;
+    console.log(nltResultsData.content);
     document.execCommand(`selectAll`, false, null);
     document.execCommand(`delete`, false, null);
-    document.execCommand(`insertHTML`, false, replaceAllNLPTags(resultsData.content.text));
+    document.execCommand(`insertHTML`, false, renderLightBulbLayout(resultsData.content.text));
 }
 function disableLightBulbPopups() {
     const lightBulbElementCollection = document.querySelectorAll(`.light-bulb`);
     for (const lightBulbElement of lightBulbElementCollection) {
-        lightBulbElement.querySelector(`.light-bulb__icon`).classList.remove(`light-bulb__icon_active`);
-        lightBulbElement.querySelector(`.light-bulb__content`).classList.remove(`light-bulb__content_active`);
+        const lightBulbIconElement = lightBulbElement.querySelector(`.light-bulb__icon`);
+        const lightBulbContentElement = lightBulbElement.querySelector(`.light-bulb__content`);
+        lightBulbIconElement.classList.remove(`light-bulb__icon_active`);
+        if (lightBulbContentElement) {
+            lightBulbContentElement.classList.remove(`light-bulb__content_active`);
+        }
     }
 
-}
-function getDOMElementIndex(DOMElement, DOMElementCollection) {
-    return Array.from(DOMElementCollection).findIndex((DOMElementItem) => DOMElementItem === DOMElement);
 }
 function getCookie(name) {
     const matches = document.cookie.match(new RegExp(
@@ -194,7 +218,9 @@ const AJAX_URL = `https://rubineducation.com/wp-admin/admin-ajax.php`;
 const COOKIE_ID_NAME = `nlt-id`;
 const KEY_CODE_NAME = `Enter`;
 const WORDPRESS_AJAX_ACTION_NAME = `nlt`;
-const REGEX_NLT = /<nlp>\d{1}<\/nlp>/ig;
+// const REGEX_NLT = ;
+// const REGEX_NLT_2 = ;
+const TEXT_NODE_TYPE_INDEX = 3;
 const COOKIE_SETTINGS = {
     path: `/`,
     secure: true,
@@ -217,8 +243,20 @@ document.addEventListener(`DOMContentLoaded`, () => {
     }
     if (form) {
         document.addEventListener(`click`, onDocumentClickHandler);
-        document.execCommand("defaultParagraphSeparator", false, "div");
+        document.execCommand(`defaultParagraphSeparator`, false, `div`);
+        document.execCommand(`styleWithCSS`, true);
         form.addEventListener(`submit`, onFormSubmitHandler);
+        formTextarea.addEventListener('paste', (event) => {
+            let paste = (event.clipboardData || window.clipboardData).getData('text');
+            // paste = paste.toUpperCase();
+        
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return false;
+            selection.deleteFromDocument();
+            selection.getRangeAt(0).insertNode(document.createTextNode(paste));
+        
+            event.preventDefault();
+        });
         // formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
     }
 });

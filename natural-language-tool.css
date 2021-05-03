@@ -55,7 +55,7 @@ input[type="text"].b-form__input_empty {
     padding: 15px 20px;
     font-size: 16px;
     color: var(--dark);
-    /* overflow-y: auto; */
+    overflow-y: auto;
 }
 .b-form__textarea:focus {
     border-color: #ccc;
