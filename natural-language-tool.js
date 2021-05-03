@@ -155,9 +155,9 @@ function getTimestamp() {
     return dateNow.getTime();
 }
 function renderLightBulbLayout(content) {
-    content = content.replaceAll(/\n|\r/g, `<br>`);
-    return content.replaceAll(/.+\S/ig, (replacement) => {
-        const result = replacement.replaceAll(/<nlp>\d{1}<\/nlp>/g, (innerItem) => {
+    content = content.replaceAll(REGEX_NEW_LINE_SYMBOL, `<br>`);
+    return content.replaceAll(REGEX_NEW_LINE, (replacement) => {
+        const result = replacement.replaceAll(REGEX_NLT_TAG, (innerItem) => {
             const replacementIndex = innerItem.match(/\d{1}/g);
             if (replacementIndex) {
                 return `${getLightBulbHTMLTemplate(replacementIndex)}`;
@@ -218,8 +218,9 @@ const AJAX_URL = `https://rubineducation.com/wp-admin/admin-ajax.php`;
 const COOKIE_ID_NAME = `nlt-id`;
 const KEY_CODE_NAME = `Enter`;
 const WORDPRESS_AJAX_ACTION_NAME = `nlt`;
-// const REGEX_NLT = ;
-// const REGEX_NLT_2 = ;
+const REGEX_NEW_LINE = /.+\S/ig;
+const REGEX_NLT_TAG = /<nlp>\d{1}<\/nlp>/g;
+const REGEX_NEW_LINE_SYMBOL = /\n|\r/g;
 const TEXT_NODE_TYPE_INDEX = 3;
 const COOKIE_SETTINGS = {
     path: `/`,
