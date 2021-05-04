@@ -20,6 +20,7 @@
     width: 100%;
 }
 .b-form__row {
+    position: relative;
     display: flex;
     flex-direction: column;
     margin-bottom: 15px;
@@ -53,13 +54,27 @@ input[type="text"].b-form__input_empty {
     resize: vertical;
     border: 1px solid #eee;
     padding: 15px 20px;
-    font-size: 16px;
+    font-size: 16px !important;
     color: var(--dark);
     overflow-y: auto;
 }
 .b-form__textarea:focus {
     border-color: #ccc;
     outline-style: none;
+}
+.b-form__textarea.b-form__input_empty {
+    border-color: red;
+}
+.b-form__message {
+    opacity: 0;
+    position: absolute;
+    top: calc(100% - 1px);
+    left: 2px;
+    font-size: 11px;
+    color: red;
+}
+.b-form__input_empty + .b-form__message {
+    opacity: 1;
 }
 .b-form__button {
     margin-top: 30px;

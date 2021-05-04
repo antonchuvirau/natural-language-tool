@@ -23,24 +23,40 @@ function onFormTextareaKeydownHandler(evt) {
         }
     }
 }
-function checkFormSubject(subjectInput) {
-    if (!subjectInput.value) {
-        subjectInput.classList.add(`b-form__input_empty`);
-        return;
+function isFormInputsEmpty() {
+    let isValid = false
+    // CHECK SUBJECT LINE
+    if (!formSubjectInput.value) {
+        formSubjectInput.classList.add(`b-form__input_empty`);
+        isValid = false;
     }
-    subjectInput.classList.remove(`b-form__input_empty`);
-    return true;
+    else {
+        formSubjectInput.classList.remove(`b-form__input_empty`);
+        isValid = true;
+    }
+    // CHECK CONTENT
+    if (!formTextarea.textContent) {
+        formTextarea.classList.add(`b-form__input_empty`);
+        isValid = false;
+    }
+    else {
+        formTextarea.classList.remove(`b-form__input_empty`);
+        isValid = true;
+    }
+    return isValid;
 }
 function onFormSubmitHandler(evt) {
     evt.preventDefault();
     if (evt.type === `submit`) {
-        changeFormStatus(true);
-        // SENDING DATA TO THE SERVER
-        const formResponse = getFormResponse(generateFormData());
-        formResponse.then(resp => resp.json()).then(data => {
-            changeFormStatus(false);
-            parseFormResponse(data);
-        }).catch(error => alert(error));
+        if (isFormInputsEmpty()) {
+            changeFormStatus(true);
+            // SENDING DATA TO THE SERVER
+            const formResponse = getFormResponse(generateFormData());
+            formResponse.then(resp => resp.json()).then(data => {
+                changeFormStatus(false);
+                parseFormResponse(data);
+            }).catch(error => alert(error));
+        }
     }
 }
 function isLightBulbContent(lightBulbElement) {
@@ -169,7 +185,7 @@ function renderLightBulbLayout(content) {
 function parseFormResponse(resultsData) {
     // MAKE RESULTS GLOBAL
     nltResultsData = resultsData;
-    console.log(nltResultsData.content);
+    console.log(nltResultsData);
     document.execCommand(`selectAll`, false, null);
     document.execCommand(`delete`, false, null);
     document.execCommand(`insertHTML`, false, renderLightBulbLayout(resultsData.content.text));
