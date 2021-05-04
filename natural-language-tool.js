@@ -23,32 +23,39 @@ function onFormTextareaKeydownHandler(evt) {
         }
     }
 }
-function isFormInputsEmpty() {
-    let isValid = false
-    // CHECK SUBJECT LINE
-    if (!formSubjectInput.value) {
-        formSubjectInput.classList.add(`b-form__input_empty`);
-        isValid = false;
+function validForm() {
+    const formInputCollection = document.querySelectorAll(`.b-form__input`);
+    if (formInputCollection.length) {
+        for (const formInputElement of Array.from(formInputCollection)) {
+            if (formInputElement.getAttribute(`name`) === `subject`) {
+                if (formInputElement.value === ``) {
+                    isSubjectValid = false;
+                    formInputElement.classList.add(`b-form__input_empty`);
+                }
+                else if (formInputElement.value !== ``) {
+                    console.log('Subject is not Empty');
+                    isSubjectValid = true;
+                    formInputElement.classList.remove(`b-form__input_empty`);
+                }
+            }
+            if (formInputElement.classList.contains(`b-form__textarea`)) {
+                if (!formInputElement.textContent) {
+                    isContentValid = false;
+                    formInputElement.classList.add(`b-form__input_empty`);
+                }
+                else if (formInputElement.textContent) {
+                    isContentValid = true;
+                    formInputElement.classList.remove(`b-form__input_empty`);
+                }
+            }
+        }
     }
-    else {
-        formSubjectInput.classList.remove(`b-form__input_empty`);
-        isValid = true;
-    }
-    // CHECK CONTENT
-    if (!formTextarea.textContent) {
-        formTextarea.classList.add(`b-form__input_empty`);
-        isValid = false;
-    }
-    else {
-        formTextarea.classList.remove(`b-form__input_empty`);
-        isValid = true;
-    }
-    return isValid;
 }
 function onFormSubmitHandler(evt) {
     evt.preventDefault();
     if (evt.type === `submit`) {
-        if (isFormInputsEmpty()) {
+        validForm();
+        if (isSubjectValid && isContentValid) {
             changeFormStatus(true);
             // SENDING DATA TO THE SERVER
             const formResponse = getFormResponse(generateFormData());
@@ -250,6 +257,8 @@ const formSubmitButton = document.querySelector(`.b-form__button`);
 const formTextarea = document.querySelector(`.b-form__textarea`);
 const formSubjectInput = document.querySelector(`.b-form__input[name="subject"]`);
 let nltResultsData;
+let isSubjectValid = false;
+let isContentValid = false;
 
 // EVENTS
 document.addEventListener(`DOMContentLoaded`, () => {
