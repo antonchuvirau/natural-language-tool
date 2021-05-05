@@ -87,6 +87,26 @@ function renderLightBulbContent(lightBulbElement, indexOfARule) {
     clonedLightBulbContentTemplate.querySelector(`.light-bulb__list`).appendChild(messageContentTag);
     lightBulbContentFragment.appendChild(clonedLightBulbContentTemplate);
     lightBulbElement.appendChild(lightBulbContentFragment);
+
+}
+function getCoord(DOMElement) {
+    return DOMElement.getBoundingClientRect();
+}
+function changeLightBulbContentPosition(lightBulbContentCoords, formTextareaCoords, targetElement) {
+    if (lightBulbContentCoords.top < formTextareaCoords.top) {
+        targetElement.nextElementSibling.style.bottom = `auto`;
+        targetElement.nextElementSibling.style.top = `calc(100% + 15px)`;
+    }
+    if (lightBulbContentCoords.bottom > formTextareaCoords.bottom) {
+        targetElement.nextElementSibling.style.top = `auto`;
+        targetElement.nextElementSibling.style.bottom = `25px`;
+    }
+    if (lightBulbContentCoords.right > formTextareaCoords.right) {
+        const extraLength = lightBulbContentCoords.right - formTextareaCoords.right;
+        console.log(extraLength);
+        targetElement.nextElementSibling.style.left = `-${extraLength + 10}px`;
+        targetElement.nextElementSibling.style.right = `auto`;
+    }
 }
 function onDocumentClickHandler(evt) {
     const target = evt.target;
@@ -103,6 +123,10 @@ function onDocumentClickHandler(evt) {
                 formTextarea.removeAttribute(`contenteditable`);
                 target.classList.add(`light-bulb__icon_active`);
                 target.nextElementSibling.classList.toggle(`light-bulb__content_active`);
+                // GET COORDS FOR ELEMENT
+                const lightBulbContentCoords = getCoord(target.nextElementSibling);
+                const formTextareaCoords = getCoord(formTextarea);
+                changeLightBulbContentPosition(lightBulbContentCoords, formTextareaCoords, target);
                 return;
             }
             disableLightBulbPopups();
@@ -110,6 +134,10 @@ function onDocumentClickHandler(evt) {
             formTextarea.removeAttribute(`contenteditable`);
             target.classList.add(`light-bulb__icon_active`);
             target.nextElementSibling.classList.toggle(`light-bulb__content_active`);
+            // GET COORDS FOR ELEMENT
+            const lightBulbContentCoords = getCoord(target.nextElementSibling);
+            const formTextareaCoords = getCoord(formTextarea);
+            changeLightBulbContentPosition(lightBulbContentCoords, formTextareaCoords, target);
             return;
         }
         // DRY
@@ -152,7 +180,16 @@ function getFormResponse(formRequestData) {
 }
 function parseFormContent() {
     const formContent = formTextarea.innerHTML;
-    const formContentChildNodes = formTextarea.childNodes;
+    // const lightBulbCollection = formTextarea.querySelectorAll(`.light-bulb`);
+    // if (lightBulbCollection.length) {
+    //     for (const lightBulbItem of lightBulbCollection) {
+    //         lightBulbItem.remove();
+    //     }
+    //     formContent.replaceAll(/<br>/ig, `\n`);
+    //     console.log(formContent);
+    // }
+    // const formContentChildNodes = formTextarea.childNodes;
+    // console.log(formContentChildNodes);
     const modifiedFormContent = formContent.replaceAll(/<div>.+<\/div>/ig, (replacement) => {
         replacement = replacement.replaceAll(`<br>`, ``);
         replacement = replacement.replaceAll(`<div>`, `\n`);
@@ -270,11 +307,11 @@ document.addEventListener(`DOMContentLoaded`, () => {
     if (form) {
         document.addEventListener(`click`, onDocumentClickHandler);
         document.execCommand(`defaultParagraphSeparator`, false, `div`);
-        document.execCommand(`styleWithCSS`, true);
+        document.execCommand(`styleWithCSS`, false);
         form.addEventListener(`submit`, onFormSubmitHandler);
         formTextarea.addEventListener('paste', (event) => {
             let paste = (event.clipboardData || window.clipboardData).getData('text');
-            // paste = paste.toUpperCase();
+            console.log(paste, event.clipboardData);
         
             const selection = window.getSelection();
             if (!selection.rangeCount) return false;

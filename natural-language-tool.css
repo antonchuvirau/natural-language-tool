@@ -57,6 +57,7 @@ input[type="text"].b-form__input_empty {
     font-size: 16px !important;
     color: var(--dark);
     overflow-y: auto;
+    word-break: break-word;
 }
 .b-form__textarea:focus {
     border-color: #ccc;
@@ -246,4 +247,18 @@ input[type="text"].b-form__input_empty {
     font-weight: 600;
     font-size: 12px;
     font-style: normal;
+}
+
+/* MEDIA */
+@media screen and (max-width: 575px) {
+    .light-bulb__content {
+        width: 265px;
+    }
+    .b-form__textarea {
+        padding: 15px;
+        font-size: 15px !important;
+    }
+    .b-form__content p {
+        font-size: 14px !important;
+    }
 }
