@@ -33,7 +33,6 @@ function validForm() {
                     formInputElement.classList.add(`b-form__input_empty`);
                 }
                 else if (formInputElement.value !== ``) {
-                    console.log('Subject is not Empty');
                     isSubjectValid = true;
                     formInputElement.classList.remove(`b-form__input_empty`);
                 }
@@ -103,7 +102,6 @@ function changeLightBulbContentPosition(lightBulbContentCoords, formTextareaCoor
     }
     if (lightBulbContentCoords.right > formTextareaCoords.right) {
         const extraLength = lightBulbContentCoords.right - formTextareaCoords.right;
-        console.log(extraLength);
         targetElement.nextElementSibling.style.left = `-${extraLength + 10}px`;
         targetElement.nextElementSibling.style.right = `auto`;
     }
@@ -155,10 +153,13 @@ function onDocumentClickHandler(evt) {
     }
     if (target.matches(`.light-bulb__header-button`)) {
         const ruleIndex = target.dataset.ruleIndex;
-        const ruleContent = nltResultsData['learn_rules'][ruleIndex];
+        const ruleContent = nltResultsData['learn_rules'][ruleIndex].replaceAll(REGEX_NEW_LINE, (replacement) => {
+            replacement.replaceAll(`\n`, ``);
+            return `<p>${replacement}</p>`;
+        });
         jQuery('#rule-description').modal();
         const ruleContentModal = document.querySelector(`.jquery-modal.current`).querySelector(`.modal__grid`);
-        ruleContentModal.textContent = ruleContent;
+        ruleContentModal.innerHTML = ruleContent;
     }
 }
 function generateFormData() {
@@ -166,8 +167,8 @@ function generateFormData() {
     const formData = new FormData();
     formData.set(`action`, WORDPRESS_AJAX_ACTION_NAME);
     formData.set(`id`, getCookie(COOKIE_ID_NAME));
-    // formData.set(`content`, parseFormContent());
-    formData.set(`content`, `HELLO MS. Emma\nGood Afternoon\n\nI researched your website dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd and read all about your vision for Acme Apartment Complex.\nThe project looks fantastic, and I would love to observe and be part of the planning process.\n\nI\'m on the Big State University volleyball team, a peer mentor and also the president of my dorm.\n\nThanks so much, and I hope to hear from you.\n\nPh: 832-732-9526\nJane Doe\nMachanian in Google`);
+    formData.set(`content`, parseFormContent());
+    // formData.set(`content`, `HELLO MS. Emma\nGood Afternoon\n\nI researched your website dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd and read all about your vision for Acme Apartment Complex.\nThe project looks fantastic, and I would love to observe and be part of the planning process.\n\nI\'m on the Big State University volleyball team, a peer mentor and also the president of my dorm.\n\nThanks so much, and I hope to hear from you.\n\nPh: 832-732-9526\nJane Doe\nMachanian in Google`);
     formData.set(`subject`, formSubjectInput.value);
     return formData;
 }
@@ -179,24 +180,9 @@ function getFormResponse(formRequestData) {
     });
 }
 function parseFormContent() {
-    const formContent = formTextarea.innerHTML;
-    // const lightBulbCollection = formTextarea.querySelectorAll(`.light-bulb`);
-    // if (lightBulbCollection.length) {
-    //     for (const lightBulbItem of lightBulbCollection) {
-    //         lightBulbItem.remove();
-    //     }
-    //     formContent.replaceAll(/<br>/ig, `\n`);
-    //     console.log(formContent);
-    // }
-    // const formContentChildNodes = formTextarea.childNodes;
-    // console.log(formContentChildNodes);
-    const modifiedFormContent = formContent.replaceAll(/<div>.+<\/div>/ig, (replacement) => {
-        replacement = replacement.replaceAll(`<br>`, ``);
-        replacement = replacement.replaceAll(`<div>`, `\n`);
-        replacement = replacement.replaceAll(`</div>`, ``);
-        return replacement;
-    });
-    return modifiedFormContent;
+    content = '';
+    searchChildNodes(formTextarea);
+    return content;
 }
 function changeFormStatus(isDisabled = false) {
     if (isDisabled) {
@@ -221,18 +207,59 @@ function renderLightBulbLayout(content) {
             const replacementIndex = innerItem.match(/\d{1}/g);
             if (replacementIndex) {
                 return `${getLightBulbHTMLTemplate(replacementIndex)}`;
-            }
+            }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     c
         });
-        return `<div>${result}</div>`;
+        return result;
     });
 }
+function searchChildNodes(DOMNode) {
+    const childNodes = DOMNode.childNodes;
+    for (const childNode of childNodes) {
+        // PASS ALL NODES WITH "LIGHT-BULB" CLASS NAME
+        if (childNode.nodeType === 1 && childNode.className === `light-bulb`) {
+            // PASS
+        }
+        // PASS ALL "BR" NODES THAT ARE LAST
+        else if (!childNode.hasChildNodes() && (childNode.nodeName === `BR` || childNode.nodeName === `DIV`) && !childNode.nextSibling && !childNode.parentNode.nextSibling) {
+            // PASS
+        }
+        else if (childNode.nodeType === 3 && !childNode.hasChildNodes()) {
+            if (!childNode.previousSibling) {
+                if (childNode.parentNode && childNode.parentNode.className.indexOf(`b-form__textarea`) === -1) {
+                    if (childNode.parentNode.nextSibling && (childNode.parentNode.nextSibling.className.indexOf(`light-bulb`) === -1 || childNode.parentNode.nextSibling.nodeName !== `BR`)) {
+                        content += `${childNode.nodeValue}\n`;
+                    }
+                    else {
+                        content += `${childNode.nodeValue}`;
+                    }
+                }
+                else {
+                    if (childNode.nextSibling && (childNode.nextSibling.className.indexOf(`light-bulb`) === -1 && childNode.nextSibling.nodeName !== `BR`)) {
+                        content += `${childNode.nodeValue}\n`;
+                    }
+                    else {
+                        content += `${childNode.nodeValue}`;
+                    }
+                }
+            }
+            else {
+                content += `${childNode.nodeValue}`;
+            }
+        }
+        else if (!childNode.hasChildNodes() && childNode.nodeName === `BR`) {
+            content += `\n`;
+        }
+        else {
+            searchChildNodes(childNode);
+        }
+    }
+}
 function parseFormResponse(resultsData) {
-    // MAKE RESULTS GLOBAL
     nltResultsData = resultsData;
     console.log(nltResultsData);
     document.execCommand(`selectAll`, false, null);
     document.execCommand(`delete`, false, null);
-    document.execCommand(`insertHTML`, false, renderLightBulbLayout(resultsData.content.text));
+    document.execCommand(`insertHTML`, false, renderLightBulbLayout(nltResultsData.content.text));
 }
 function disableLightBulbPopups() {
     const lightBulbElementCollection = document.querySelectorAll(`.light-bulb`);
@@ -281,7 +308,6 @@ const WORDPRESS_AJAX_ACTION_NAME = `nlt`;
 const REGEX_NEW_LINE = /.+\S/ig;
 const REGEX_NLT_TAG = /<nlp>\d{1}<\/nlp>/g;
 const REGEX_NEW_LINE_SYMBOL = /\n|\r/g;
-const TEXT_NODE_TYPE_INDEX = 3;
 const COOKIE_SETTINGS = {
     path: `/`,
     secure: true,
@@ -293,6 +319,7 @@ const form = document.querySelector(`.b-form__el`);
 const formSubmitButton = document.querySelector(`.b-form__button`);
 const formTextarea = document.querySelector(`.b-form__textarea`);
 const formSubjectInput = document.querySelector(`.b-form__input[name="subject"]`);
+let content = '';
 let nltResultsData;
 let isSubjectValid = false;
 let isContentValid = false;
@@ -311,7 +338,6 @@ document.addEventListener(`DOMContentLoaded`, () => {
         form.addEventListener(`submit`, onFormSubmitHandler);
         formTextarea.addEventListener('paste', (event) => {
             let paste = (event.clipboardData || window.clipboardData).getData('text');
-            console.log(paste, event.clipboardData);
         
             const selection = window.getSelection();
             if (!selection.rangeCount) return false;
@@ -320,7 +346,6 @@ document.addEventListener(`DOMContentLoaded`, () => {
         
             event.preventDefault();
         });
-        // formTextarea.addEventListener(`keydown`, onFormTextareaKeydownHandler);
     }
 });
 // DELETE COOKIA WHEN CLOSING A TAB

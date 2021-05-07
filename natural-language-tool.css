@@ -14,10 +14,11 @@
 }
 .b-form {
     display: flex;
-    padding: 50px 0;
 }
 .b-form__el {
     width: 100%;
+    padding: 50px 0;
+    padding-bottom: 100px;
 }
 .b-form__row {
     position: relative;
@@ -39,6 +40,7 @@
     font-weight: 700;
 }
 input[type="text"].b-form__input {
+    font-family: 'Open Sans', sans-serif;
     border-radius: 5px;
     border: 1px solid #eee;
     padding: 0 15px;
@@ -49,6 +51,7 @@ input[type="text"].b-form__input_empty {
     border-color: red;
 }
 .b-form__textarea {
+    font-family: 'Open Sans', sans-serif;
     height: 350px;
     border-radius: 5px;
     resize: vertical;
@@ -59,7 +62,7 @@ input[type="text"].b-form__input_empty {
     overflow-y: auto;
     word-break: break-word;
 }
-.b-form__textarea:focus {
+.b-form__textarea:focus, input[type="text"].b-form__input:focus {
     border-color: #ccc;
     outline-style: none;
 }
@@ -138,7 +141,7 @@ input[type="text"].b-form__input_empty {
     max-width: 700px;
 }
 .modal__grid {
-    padding: 40px 30px;
+    padding: 40px 0;
 }
 .modal__grid p, .modal__grid ul li {
     font-size: 15px;
@@ -256,9 +259,22 @@ input[type="text"].b-form__input_empty {
     }
     .b-form__textarea {
         padding: 15px;
+        height: 250px;
         font-size: 15px !important;
     }
     .b-form__content p {
         font-size: 14px !important;
+    }
+    .b-form__input[name="subject"] {
+        font-size: 15px !important;
+    }
+    .b-form__label {
+        font-size: 14px;
+    }
+    .b-form__button {
+        width: 100%;
+    }
+    .modal {
+        max-width: 100%;
     }
 }
