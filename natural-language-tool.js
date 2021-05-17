@@ -68,13 +68,13 @@ function onFormSubmitHandler(evt) {
 function isLightBulbContent(lightBulbElement) {
     return lightBulbElement.querySelector(`.light-bulb__content`) ? true : false;
 }
-function renderLightBulbContent(lightBulbElement, indexOfARule) {
+function renderLightBulbContent(lightBulbElement, indexOfARule, messagesData, examplesData) {
     const lightBulbContentTemplate = document.querySelector(`#light-bulb-content`).content;
     const lightBulbContentFragment = new DocumentFragment();
     const clonedLightBulbContentTemplate = lightBulbContentTemplate.cloneNode(true);
     // RENDER CONTENT
     clonedLightBulbContentTemplate.querySelector(`.light-bulb__header-button`).setAttribute(`data-rule-index`, indexOfARule);
-    for (const exampleItem of nltResultsData.content['nlp_response'].messages[indexOfARule - 1][indexOfARule].examples) {
+    for (const exampleItem of examplesData) {
         const exampleContentTag = document.createElement(`li`);
         exampleContentTag.classList.add(`light-bulb__list-item`);
         exampleContentTag.textContent = exampleItem;
@@ -82,7 +82,7 @@ function renderLightBulbContent(lightBulbElement, indexOfARule) {
     }
     const messageContentTag = document.createElement(`li`);
     messageContentTag.classList.add(`light-bulb__list-item`);
-    messageContentTag.textContent = nltResultsData.content['nlp_response'].messages[indexOfARule - 1][indexOfARule].message;
+    messageContentTag.textContent = messagesData;
     clonedLightBulbContentTemplate.querySelector(`.light-bulb__list`).appendChild(messageContentTag);
     lightBulbContentFragment.appendChild(clonedLightBulbContentTemplate);
     lightBulbElement.appendChild(lightBulbContentFragment);
@@ -110,13 +110,17 @@ function onDocumentClickHandler(evt) {
     const target = evt.target;
 
     if (target.matches(`.light-bulb__icon`)) {
+
         if (!target.classList.contains(`light-bulb__icon_active`)) {
             if (!isLightBulbContent(target.closest(`.light-bulb`))) {
                 const targetParentElement = target.closest(`.light-bulb`);
                 const ruleIndex = targetParentElement.dataset.ruleIndex;
+                const lightBulbIndex = targetParentElement.dataset.lightBulbIndex;
                 disableLightBulbPopups();
                 // RENDER LIGHT BULB'S CONTENT
-                renderLightBulbContent(targetParentElement, ruleIndex);
+                const examplesContentData = nltResultsData.content['nlp_response'].messages[lightBulbIndex - 1][lightBulbIndex].examples;
+                const messagesContentData = nltResultsData.content['nlp_response'].messages[lightBulbIndex - 1][lightBulbIndex].message;
+                renderLightBulbContent(targetParentElement, ruleIndex, messagesContentData, examplesContentData);
                 // DRY
                 formTextarea.removeAttribute(`contenteditable`);
                 target.classList.add(`light-bulb__icon_active`);
@@ -168,7 +172,6 @@ function generateFormData() {
     formData.set(`action`, WORDPRESS_AJAX_ACTION_NAME);
     formData.set(`id`, getCookie(COOKIE_ID_NAME));
     formData.set(`content`, parseFormContent());
-    // formData.set(`content`, `HELLO MS. Emma\nGood Afternoon\n\nI researched your website dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd and read all about your vision for Acme Apartment Complex.\nThe project looks fantastic, and I would love to observe and be part of the planning process.\n\nI\'m on the Big State University volleyball team, a peer mentor and also the president of my dorm.\n\nThanks so much, and I hope to hear from you.\n\nPh: 832-732-9526\nJane Doe\nMachanian in Google`);
     formData.set(`subject`, formSubjectInput.value);
     return formData;
 }
@@ -206,11 +209,15 @@ function renderLightBulbLayout(content) {
         const result = replacement.replaceAll(REGEX_NLT_TAG, (innerItem) => {
             const replacementIndex = innerItem.match(/\d{1}/g);
             if (replacementIndex) {
-                return `${getLightBulbHTMLTemplate(replacementIndex)}`;
+                const ruleIndex = nltResultsData.content['nlp_response'].messages[replacementIndex - 1][replacementIndex]['rule_index'];
+                return `${getLightBulbHTMLTemplate(replacementIndex, ruleIndex)}`;
             }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     c
         });
         return result;
     });
+}
+function getSubjectFieldRuleIndex(subjectFieldTextContent) {
+    return subjectFieldTextContent.match(/\d{1}/g);
 }
 function searchChildNodes(DOMNode) {
     const childNodes = DOMNode.childNodes;
@@ -256,10 +263,22 @@ function searchChildNodes(DOMNode) {
 }
 function parseFormResponse(resultsData) {
     nltResultsData = resultsData;
-    console.log(nltResultsData);
+    checkSubjectField(nltResultsData.subject['nlp_response'].messages, nltResultsData.subject.text);
     document.execCommand(`selectAll`, false, null);
     document.execCommand(`delete`, false, null);
     document.execCommand(`insertHTML`, false, renderLightBulbLayout(nltResultsData.content.text));
+}
+function checkSubjectField(subjectFieldContentData, subjectFieldTextContent) {
+    if (subjectFieldContentData.length) {
+        const subjectLightBulbElement = document.querySelector(`.light-bulb[data-target="subject"]`);
+        // RENDER LIGHT BULB'S CONTENT
+        const subjectFieldIndex = getSubjectFieldRuleIndex(subjectFieldTextContent);
+        const subjectFieldRuleIndex = nltResultsData.subject['nlp_response'].messages[subjectFieldIndex - 1][subjectFieldIndex]['rule_index'];
+        const subjectExamplesData = nltResultsData.subject['nlp_response'].messages[subjectFieldIndex - 1][subjectFieldIndex].examples;
+        const subjectMessagesData = nltResultsData.subject['nlp_response'].messages[subjectFieldIndex - 1][subjectFieldIndex].message;
+        renderLightBulbContent(subjectLightBulbElement, subjectFieldRuleIndex, subjectMessagesData, subjectExamplesData);
+        subjectLightBulbElement.classList.remove(`light-bulb_disabled`);
+    }
 }
 function disableLightBulbPopups() {
     const lightBulbElementCollection = document.querySelectorAll(`.light-bulb`);
@@ -296,8 +315,8 @@ function deleteCookie(name) {
         maxAge: -1
     });
 }
-function getLightBulbHTMLTemplate(indexOfARule) {
-    return `<div data-rule-index="${indexOfARule}" class="light-bulb"><div class="light-bulb__icon">&nbsp;</div></div>`;
+function getLightBulbHTMLTemplate(lightBulbIndex, indexOfARule) {
+    return `<div data-light-bulb-index="${lightBulbIndex}" data-rule-index="${indexOfARule}" class="light-bulb"><div class="light-bulb__icon">&nbsp;</div></div>`;
 }
 
 // VARIABLES
