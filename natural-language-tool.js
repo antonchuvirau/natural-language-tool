@@ -169,9 +169,10 @@ function onDocumentClickHandler(evt) {
 function generateFormData() {
     // CREATING FORM DATA OBJECT
     const formData = new FormData();
+    const formContent = parseFormContent();
     formData.set(`action`, WORDPRESS_AJAX_ACTION_NAME);
     formData.set(`id`, getCookie(COOKIE_ID_NAME));
-    formData.set(`content`, parseFormContent());
+    formData.set(`content`, formContent);
     formData.set(`subject`, formSubjectInput.value);
     return formData;
 }
@@ -184,7 +185,9 @@ function getFormResponse(formRequestData) {
 }
 function parseFormContent() {
     content = '';
+    console.log(`Fill a content`);
     searchChildNodes(formTextarea);
+    console.log(content);
     return content;
 }
 function changeFormStatus(isDisabled = false) {
@@ -204,6 +207,7 @@ function getTimestamp() {
     return dateNow.getTime();
 }
 function renderLightBulbLayout(content) {
+    console.log(`Start render`);
     content = content.replaceAll(REGEX_NEW_LINE_SYMBOL, `<br>`);
     return content.replaceAll(REGEX_NEW_LINE, (replacement) => {
         const result = replacement.replaceAll(REGEX_NLT_TAG, (innerItem) => {
@@ -216,7 +220,7 @@ function renderLightBulbLayout(content) {
         return result;
     });
 }
-function getSubjectFieldRuleIndex(subjectFieldTextContent) {
+function getSubjectFieldIndex(subjectFieldTextContent) {
     return subjectFieldTextContent.match(/\d{1}/g);
 }
 function searchChildNodes(DOMNode) {
@@ -231,7 +235,9 @@ function searchChildNodes(DOMNode) {
             // PASS
         }
         else if (childNode.nodeType === 3 && !childNode.hasChildNodes()) {
+            console.log(`TEXT NODE`);
             if (!childNode.previousSibling) {
+                console.log(`TEXT NODE HAS NO PREV`);
                 if (childNode.parentNode && childNode.parentNode.className.indexOf(`b-form__textarea`) === -1) {
                     if (childNode.parentNode.nextSibling && (childNode.parentNode.nextSibling.className.indexOf(`light-bulb`) === -1 || childNode.parentNode.nextSibling.nodeName !== `BR`)) {
                         content += `${childNode.nodeValue}\n`;
@@ -249,8 +255,15 @@ function searchChildNodes(DOMNode) {
                     }
                 }
             }
-            else {
-                content += `${childNode.nodeValue}`;
+            else if (childNode.previousSibling) {
+                console.log(`TEXT NODE HAS PREV`);
+                if (childNode.nextSibling && childNode.nextSibling.nodeName === `DIV` && childNode.nextSibling.hasChildNodes() && childNode.nextSibling.className.indexOf(`light-bulb`) === -1) {
+                    content += `${childNode.nodeValue}\n`;
+                }
+                else {
+                    console.log(`TEXT NODE HAS NEXT DIV`);
+                    content += `${childNode.nodeValue}`;
+                }
             }
         }
         else if (!childNode.hasChildNodes() && childNode.nodeName === `BR`) {
@@ -263,16 +276,19 @@ function searchChildNodes(DOMNode) {
 }
 function parseFormResponse(resultsData) {
     nltResultsData = resultsData;
-    checkSubjectField(nltResultsData.subject['nlp_response'].messages, nltResultsData.subject.text);
     document.execCommand(`selectAll`, false, null);
     document.execCommand(`delete`, false, null);
+    console.log(`Render`, nltResultsData.content.text);
     document.execCommand(`insertHTML`, false, renderLightBulbLayout(nltResultsData.content.text));
+    console.log(`Subject`);
+    checkSubjectField(nltResultsData.subject['nlp_response'].messages, nltResultsData.subject.text);
 }
 function checkSubjectField(subjectFieldContentData, subjectFieldTextContent) {
+    console.log(`Start subject`);
     if (subjectFieldContentData.length) {
         const subjectLightBulbElement = document.querySelector(`.light-bulb[data-target="subject"]`);
         // RENDER LIGHT BULB'S CONTENT
-        const subjectFieldIndex = getSubjectFieldRuleIndex(subjectFieldTextContent);
+        const subjectFieldIndex = getSubjectFieldIndex(subjectFieldTextContent);
         const subjectFieldRuleIndex = nltResultsData.subject['nlp_response'].messages[subjectFieldIndex - 1][subjectFieldIndex]['rule_index'];
         const subjectExamplesData = nltResultsData.subject['nlp_response'].messages[subjectFieldIndex - 1][subjectFieldIndex].examples;
         const subjectMessagesData = nltResultsData.subject['nlp_response'].messages[subjectFieldIndex - 1][subjectFieldIndex].message;
