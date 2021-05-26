@@ -69,6 +69,7 @@ function isLightBulbContent(lightBulbElement) {
     return lightBulbElement.querySelector(`.light-bulb__content`) ? true : false;
 }
 function renderLightBulbContent(lightBulbElement, indexOfARule, messagesData, examplesData) {
+    console.log(`Start rendering`);
     const lightBulbContentTemplate = document.querySelector(`#light-bulb-content`).content;
     const lightBulbContentFragment = new DocumentFragment();
     const clonedLightBulbContentTemplate = lightBulbContentTemplate.cloneNode(true);
@@ -86,7 +87,7 @@ function renderLightBulbContent(lightBulbElement, indexOfARule, messagesData, ex
     clonedLightBulbContentTemplate.querySelector(`.light-bulb__list`).appendChild(messageContentTag);
     lightBulbContentFragment.appendChild(clonedLightBulbContentTemplate);
     lightBulbElement.appendChild(lightBulbContentFragment);
-
+    console.log(`End rendering`);
 }
 function getCoord(DOMElement) {
     return DOMElement.getBoundingClientRect();
@@ -165,11 +166,16 @@ function onDocumentClickHandler(evt) {
         const ruleContentModal = document.querySelector(`.jquery-modal.current`).querySelector(`.modal__grid`);
         ruleContentModal.innerHTML = ruleContent;
     }
+    if (target.matches(`.light-bulb__button-action`)) {
+        const lightBulbElement = target.closest(`.light-bulb`);
+        lightBulbElement.dataset.target ? lightBulbElement.classList.add(`light-bulb_disabled`) : lightBulbElement.remove();
+    }
 }
 function generateFormData() {
     // CREATING FORM DATA OBJECT
     const formData = new FormData();
     const formContent = parseFormContent();
+    console.log(formContent);
     formData.set(`action`, WORDPRESS_AJAX_ACTION_NAME);
     formData.set(`id`, getCookie(COOKIE_ID_NAME));
     formData.set(`content`, formContent);
@@ -185,9 +191,7 @@ function getFormResponse(formRequestData) {
 }
 function parseFormContent() {
     content = '';
-    console.log(`Fill a content`);
     searchChildNodes(formTextarea);
-    console.log(content);
     return content;
 }
 function changeFormStatus(isDisabled = false) {
@@ -207,7 +211,6 @@ function getTimestamp() {
     return dateNow.getTime();
 }
 function renderLightBulbLayout(content) {
-    console.log(`Start render`);
     content = content.replaceAll(REGEX_NEW_LINE_SYMBOL, `<br>`);
     return content.replaceAll(REGEX_NEW_LINE, (replacement) => {
         const result = replacement.replaceAll(REGEX_NLT_TAG, (innerItem) => {
@@ -275,16 +278,14 @@ function searchChildNodes(DOMNode) {
     }
 }
 function parseFormResponse(resultsData) {
+    console.log(resultsData);
     nltResultsData = resultsData;
     document.execCommand(`selectAll`, false, null);
     document.execCommand(`delete`, false, null);
-    console.log(`Render`, nltResultsData.content.text);
     document.execCommand(`insertHTML`, false, renderLightBulbLayout(nltResultsData.content.text));
-    console.log(`Subject`);
     checkSubjectField(nltResultsData.subject['nlp_response'].messages, nltResultsData.subject.text);
 }
 function checkSubjectField(subjectFieldContentData, subjectFieldTextContent) {
-    console.log(`Start subject`);
     if (subjectFieldContentData.length) {
         const subjectLightBulbElement = document.querySelector(`.light-bulb[data-target="subject"]`);
         // RENDER LIGHT BULB'S CONTENT
@@ -301,7 +302,9 @@ function disableLightBulbPopups() {
     for (const lightBulbElement of lightBulbElementCollection) {
         const lightBulbIconElement = lightBulbElement.querySelector(`.light-bulb__icon`);
         const lightBulbContentElement = lightBulbElement.querySelector(`.light-bulb__content`);
-        lightBulbIconElement.classList.remove(`light-bulb__icon_active`);
+        if (lightBulbIconElement) {
+            lightBulbIconElement.classList.remove(`light-bulb__icon_active`);
+        }
         if (lightBulbContentElement) {
             lightBulbContentElement.classList.remove(`light-bulb__content_active`);
         }

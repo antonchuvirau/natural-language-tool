@@ -220,7 +220,7 @@ input[type="text"].b-form__input_empty {
 }
 .light-bulb__header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     background: var(--dark-50);
     border-radius: 5px 5px 0px 0px;
     padding: 5px 10px;
@@ -245,6 +245,24 @@ input[type="text"].b-form__input_empty {
     appearance: none;
     border: none;
     box-shadow: none;
+}
+.light-bulb__button-action {
+    color: var(--primary);
+    -webkit-appearance: none;
+    appearance: none;
+    border: 1px solid var(--primary);
+    border-radius: 2px;
+    padding: 2px 3px;
+    box-shadow: none;
+    font-size: 10px;
+    text-transform: uppercase;
+    margin-left: 10px;
+    background: none;
+    letter-spacing: 0.05em;
+}
+.light-bulb__button-action:hover {
+    background: var(--primary);
+    color: var(--white);
 }
 .light-bulb__list-item:last-child {
     background: var(--primary);
