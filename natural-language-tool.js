@@ -69,7 +69,6 @@ function isLightBulbContent(lightBulbElement) {
     return lightBulbElement.querySelector(`.light-bulb__content`) ? true : false;
 }
 function renderLightBulbContent(lightBulbElement, indexOfARule, messagesData, examplesData) {
-    console.log(`Start rendering`);
     const lightBulbContentTemplate = document.querySelector(`#light-bulb-content`).content;
     const lightBulbContentFragment = new DocumentFragment();
     const clonedLightBulbContentTemplate = lightBulbContentTemplate.cloneNode(true);
@@ -87,7 +86,6 @@ function renderLightBulbContent(lightBulbElement, indexOfARule, messagesData, ex
     clonedLightBulbContentTemplate.querySelector(`.light-bulb__list`).appendChild(messageContentTag);
     lightBulbContentFragment.appendChild(clonedLightBulbContentTemplate);
     lightBulbElement.appendChild(lightBulbContentFragment);
-    console.log(`End rendering`);
 }
 function getCoord(DOMElement) {
     return DOMElement.getBoundingClientRect();
@@ -174,8 +172,7 @@ function onDocumentClickHandler(evt) {
 function generateFormData() {
     // CREATING FORM DATA OBJECT
     const formData = new FormData();
-    const formContent = parseFormContent();
-    console.log(formContent);
+    const formContent = parseFormContent(formTextarea.childNodes);
     formData.set(`action`, WORDPRESS_AJAX_ACTION_NAME);
     formData.set(`id`, getCookie(COOKIE_ID_NAME));
     formData.set(`content`, formContent);
@@ -189,9 +186,10 @@ function getFormResponse(formRequestData) {
         body: formRequestData
     });
 }
-function parseFormContent() {
+function parseFormContent(formContent) {
     content = '';
-    searchChildNodes(formTextarea);
+    searchChildNodes(formContent);
+    console.log(content);
     return content;
 }
 function changeFormStatus(isDisabled = false) {
@@ -226,9 +224,8 @@ function renderLightBulbLayout(content) {
 function getSubjectFieldIndex(subjectFieldTextContent) {
     return subjectFieldTextContent.match(/\d{1}/g);
 }
-function searchChildNodes(DOMNode) {
-    const childNodes = DOMNode.childNodes;
-    for (const childNode of childNodes) {
+function searchChildNodes(DOMNodeChildNodes) {
+    for (const childNode of Array.from(DOMNodeChildNodes)) {
         // PASS ALL NODES WITH "LIGHT-BULB" CLASS NAME
         if (childNode.nodeType === 1 && childNode.className === `light-bulb`) {
             // PASS
@@ -238,9 +235,7 @@ function searchChildNodes(DOMNode) {
             // PASS
         }
         else if (childNode.nodeType === 3 && !childNode.hasChildNodes()) {
-            console.log(`TEXT NODE`);
             if (!childNode.previousSibling) {
-                console.log(`TEXT NODE HAS NO PREV`);
                 if (childNode.parentNode && childNode.parentNode.className.indexOf(`b-form__textarea`) === -1) {
                     if (childNode.parentNode.nextSibling && (childNode.parentNode.nextSibling.className.indexOf(`light-bulb`) === -1 || childNode.parentNode.nextSibling.nodeName !== `BR`)) {
                         content += `${childNode.nodeValue}\n`;
@@ -259,12 +254,10 @@ function searchChildNodes(DOMNode) {
                 }
             }
             else if (childNode.previousSibling) {
-                console.log(`TEXT NODE HAS PREV`);
                 if (childNode.nextSibling && childNode.nextSibling.nodeName === `DIV` && childNode.nextSibling.hasChildNodes() && childNode.nextSibling.className.indexOf(`light-bulb`) === -1) {
                     content += `${childNode.nodeValue}\n`;
                 }
                 else {
-                    console.log(`TEXT NODE HAS NEXT DIV`);
                     content += `${childNode.nodeValue}`;
                 }
             }
@@ -273,16 +266,18 @@ function searchChildNodes(DOMNode) {
             content += `\n`;
         }
         else {
-            searchChildNodes(childNode);
+            searchChildNodes(childNode.childNodes);
         }
     }
 }
 function parseFormResponse(resultsData) {
     console.log(resultsData);
     nltResultsData = resultsData;
-    document.execCommand(`selectAll`, false, null);
-    document.execCommand(`delete`, false, null);
-    document.execCommand(`insertHTML`, false, renderLightBulbLayout(nltResultsData.content.text));
+    formTextarea.innerHTML = ``;
+    formTextarea.innerHTML = renderLightBulbLayout(nltResultsData.content.text);
+    // formTextarea.execCommand(`selectAll`, false, null);
+    // formTextarea.execCommand(`delete`, false, null);
+    // formTextarea.execCommand(`insertHTML`, false, renderLightBulbLayout(nltResultsData.content.text));
     checkSubjectField(nltResultsData.subject['nlp_response'].messages, nltResultsData.subject.text);
 }
 function checkSubjectField(subjectFieldContentData, subjectFieldTextContent) {
@@ -338,6 +333,22 @@ function getLightBulbHTMLTemplate(lightBulbIndex, indexOfARule) {
     return `<div data-light-bulb-index="${lightBulbIndex}" data-rule-index="${indexOfARule}" class="light-bulb"><div class="light-bulb__icon">&nbsp;</div></div>`;
 }
 
+function onDocumentCopyСutHandler(evt) {
+    const selection = document.getSelection();
+    const selectionObject = selection.getRangeAt(0);
+    console.log(selection, selection.getRangeAt(0));
+    // const selectionChildNodes = selectionObject.commonAncestorContainer.childNodes;
+    
+    // send uppercase text to clipboard
+    // const selectionDataContent = parseFormContent(selectionChildNodes);
+    evt.clipboardData.setData('text', selectionObject.commonAncestorContainer.innerText);
+    if (evt.type === 'cut') {
+        selection.deleteFromDocument();
+    }
+    // stop default cut/copy
+    evt.preventDefault();
+}
+
 // VARIABLES
 const AJAX_URL = `https://rubineducation.com/wp-admin/admin-ajax.php`;
 const COOKIE_ID_NAME = `nlt-id`;
@@ -345,7 +356,7 @@ const KEY_CODE_NAME = `Enter`;
 const WORDPRESS_AJAX_ACTION_NAME = `nlt`;
 const REGEX_NEW_LINE = /.+\S/ig;
 const REGEX_NLT_TAG = /<nlp>\d{1}<\/nlp>/g;
-const REGEX_NEW_LINE_SYMBOL = /\n|\r/g;
+const REGEX_NEW_LINE_SYMBOL = /\r\n|\n\r|\n|\r/g;
 const COOKIE_SETTINGS = {
     path: `/`,
     secure: true,
@@ -374,16 +385,13 @@ document.addEventListener(`DOMContentLoaded`, () => {
         document.execCommand(`defaultParagraphSeparator`, false, `div`);
         document.execCommand(`styleWithCSS`, false);
         form.addEventListener(`submit`, onFormSubmitHandler);
-        formTextarea.addEventListener('paste', (event) => {
-            let paste = (event.clipboardData || window.clipboardData).getData('text');
-        
-            const selection = window.getSelection();
-            if (!selection.rangeCount) return false;
-            selection.deleteFromDocument();
-            selection.getRangeAt(0).insertNode(document.createTextNode(paste));
-        
-            event.preventDefault();
+        formTextarea.addEventListener('paste', (evt) => {
+            const clipboardDataText = (evt.clipboardData || window.clipboardData).getData('text');
+            evt.target.innerHTML = renderLightBulbLayout(clipboardDataText);
+            evt.preventDefault();
         });
+        document.addEventListener(`copy`, onDocumentCopyСutHandler);
+        document.addEventListener(`cut`, onDocumentCopyСutHandler);
     }
 });
 // DELETE COOKIA WHEN CLOSING A TAB
