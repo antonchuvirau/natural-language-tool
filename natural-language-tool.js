@@ -236,8 +236,8 @@ function searchChildNodes(DOMNodeChildNodes) {
         }
         else if (childNode.nodeType === 3 && !childNode.hasChildNodes()) {
             if (!childNode.previousSibling) {
-                if (childNode.parentNode && childNode.parentNode.className.indexOf(`b-form__textarea`) === -1) {
-                    if (childNode.parentNode.nextSibling && (childNode.parentNode.nextSibling.className.indexOf(`light-bulb`) === -1 || childNode.parentNode.nextSibling.nodeName !== `BR`)) {
+                if (childNode.parentNode && childNode.parentNode.className && childNode.parentNode.className.indexOf(`b-form__textarea`) === -1) {
+                    if (childNode.parentNode.nextSibling && childNode.parentNode.nextSibling.className && (childNode.parentNode.nextSibling.className.indexOf(`light-bulb`) === -1 || childNode.parentNode.nextSibling.nodeName !== `BR`)) {
                         content += `${childNode.nodeValue}\n`;
                     }
                     else {
@@ -245,7 +245,7 @@ function searchChildNodes(DOMNodeChildNodes) {
                     }
                 }
                 else {
-                    if (childNode.nextSibling && (childNode.nextSibling.className.indexOf(`light-bulb`) === -1 && childNode.nextSibling.nodeName !== `BR`)) {
+                    if (childNode.nextSibling && childNode.nextSibling.className && (childNode.nextSibling.className.indexOf(`light-bulb`) === -1 && childNode.nextSibling.nodeName !== `BR`)) {
                         content += `${childNode.nodeValue}\n`;
                     }
                     else {
@@ -336,12 +336,8 @@ function getLightBulbHTMLTemplate(lightBulbIndex, indexOfARule) {
 function onDocumentCopyСutHandler(evt) {
     const selection = document.getSelection();
     const selectionObject = selection.getRangeAt(0);
-    console.log(selection, selection.getRangeAt(0));
-    // const selectionChildNodes = selectionObject.commonAncestorContainer.childNodes;
-    
-    // send uppercase text to clipboard
-    // const selectionDataContent = parseFormContent(selectionChildNodes);
-    evt.clipboardData.setData('text', selectionObject.commonAncestorContainer.innerText);
+    const selectionDataContent = selectionObject.cloneContents();
+    evt.clipboardData.setData('text', parseFormContent(selectionDataContent.childNodes));
     if (evt.type === 'cut') {
         selection.deleteFromDocument();
     }
